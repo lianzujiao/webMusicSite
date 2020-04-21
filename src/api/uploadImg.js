@@ -1,0 +1,1 @@
+export const uploadImg="http://localhost:3000/api/upload"

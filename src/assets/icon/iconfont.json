@@ -1,0 +1,135 @@
+{
+  "id": "1693694",
+  "name": "songTaste",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "5343668",
+      "name": "前进",
+      "font_class": "-next-card",
+      "unicode": "e63a",
+      "unicode_decimal": 58938
+    },
+    {
+      "icon_id": "9874480",
+      "name": "KHCFDC_返回",
+      "font_class": "-back",
+      "unicode": "e6cc",
+      "unicode_decimal": 59084
+    },
+    {
+      "icon_id": "9114457",
+      "name": "107下一页",
+      "font_class": "next-page",
+      "unicode": "e64d",
+      "unicode_decimal": 58957
+    },
+    {
+      "icon_id": "13522672",
+      "name": "106上一页",
+      "font_class": "prev-page-copy",
+      "unicode": "e71f",
+      "unicode_decimal": 59167
+    },
+    {
+      "icon_id": "1439944",
+      "name": "音乐",
+      "font_class": "playingList",
+      "unicode": "e605",
+      "unicode_decimal": 58885
+    },
+    {
+      "icon_id": "11481162",
+      "name": "垃圾桶",
+      "font_class": "delete",
+      "unicode": "e652",
+      "unicode_decimal": 58962
+    },
+    {
+      "icon_id": "792472",
+      "name": "circle-圆圈",
+      "font_class": "circle",
+      "unicode": "e71e",
+      "unicode_decimal": 59166
+    },
+    {
+      "icon_id": "6978159",
+      "name": "暂停",
+      "font_class": "pause",
+      "unicode": "e63b",
+      "unicode_decimal": 58939
+    },
+    {
+      "icon_id": "2154283",
+      "name": "单曲循环_32",
+      "font_class": "one",
+      "unicode": "e66d",
+      "unicode_decimal": 58989
+    },
+    {
+      "icon_id": "1159898",
+      "name": "随机播放",
+      "font_class": "random-play",
+      "unicode": "e622",
+      "unicode_decimal": 58914
+    },
+    {
+      "icon_id": "880169",
+      "name": "心",
+      "font_class": "like",
+      "unicode": "e608",
+      "unicode_decimal": 58888
+    },
+    {
+      "icon_id": "5344647",
+      "name": "San Mi App glyph ico",
+      "font_class": "prev",
+      "unicode": "e66e",
+      "unicode_decimal": 58990
+    },
+    {
+      "icon_id": "5344648",
+      "name": "San Mi App glyph ico",
+      "font_class": "next",
+      "unicode": "e66f",
+      "unicode_decimal": 58991
+    },
+    {
+      "icon_id": "5344649",
+      "name": "San Mi App glyph ico",
+      "font_class": "cancel",
+      "unicode": "e670",
+      "unicode_decimal": 58992
+    },
+    {
+      "icon_id": "5344657",
+      "name": "San Mi App glyph ico",
+      "font_class": "loop",
+      "unicode": "e671",
+      "unicode_decimal": 58993
+    },
+    {
+      "icon_id": "5344659",
+      "name": "San Mi App glyph ico",
+      "font_class": "list",
+      "unicode": "e672",
+      "unicode_decimal": 58994
+    },
+    {
+      "icon_id": "5344662",
+      "name": "San Mi App glyph ico",
+      "font_class": "play",
+      "unicode": "e673",
+      "unicode_decimal": 58995
+    },
+    {
+      "icon_id": "6539427",
+      "name": "喇叭",
+      "font_class": "laba",
+      "unicode": "e683",
+      "unicode_decimal": 59011
+    }
+  ]
+}
