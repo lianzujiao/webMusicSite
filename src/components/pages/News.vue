@@ -2,7 +2,7 @@
   <div class="min-width">
     <div class="fun-news">
       <div class="top-news-list">
-        <div class="top-news-list-box" v-for="(news,index) in topNews" :key="index">
+        <div class="top-news-list-box" v-for="(news,index) in topNews" :key="index" @click="openDetail()">
           <div class="news-img-box">
             <img :src="news.img" alt />
             <div class="span-tag">专访</div>
@@ -145,6 +145,11 @@ export default {
         }
       ]
     };
+  },
+  methods:{
+    openDetail(){
+      this.$router.push({path:"newsDetail",query:{id:'5e7d9ca81971c26bf414ebde'}})
+    }
   }
 };
 </script>

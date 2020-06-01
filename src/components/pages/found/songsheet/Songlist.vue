@@ -2,52 +2,43 @@
   <div class="song-list">
     <div class="list-top">
       <div class="list-top-img">
-        <el-image :src="playlist.coverImgUrl"></el-image>
+        <img :src="sheet.coverImg" alt=""/>
       </div>
       <div class="list-top-msg text-left">
         <div class="top-msg-name">
           <span>歌单</span>
-          {{playlist.name}}
-          <span class="top-msg-span">歌曲数:{{playlist.tracks.length}}</span>
+          {{sheet.name}}
+          <!-- <span class="top-msg-span">歌曲数:{{sheet.songs.length}}</span> -->
         </div>
 
         <div class="msg-btn">
           <p class="btn-play">
             <i class="iconfont iconplay"></i>播放
           </p>
-          <p class="btn-add">添加</p>
+          <!-- <p class="btn-add">添加</p> -->
         </div>
-        <p class="msg-tags">
-          标签：
-          <router-link to="##" v-for="(tag,index) in playlist.tags" :key="index">{{tag}}&nbsp;</router-link>
-          <!-- <span ></span> -->
-        </p>
+     
         <p class="msg-intro">
           简介:
-          <span>{{playlist.description}}</span>
+          <span>{{sheet.desc}}</span>
         </p>
       </div>
     </div>
     <div class="list-center">
       <p class="center-list-tit text-left">歌曲列表</p>
       <div class="list-column text-left">
-        <p class="column-one">操作</p>
         <p class="column-two">音乐标题</p>
         <p class="column-three">歌手</p>
         <p class="column-four">专辑</p>
-        <p class="column-last">时长</p>
       </div>
-      <div class="song-msg-box" v-for="(song,index) in playlist.tracks" :key="index">
+      <div class="song-msg-box" v-for="(song,index) in sheet.songs" :key="index">
         <p class="msg-box-index">{{index+1}}</p>
-        <p class="msg-box-icon">
-          <i class="iconfont iconlike"></i>
-        </p>
+
         <p class="msg-box-name text-left">{{song.name}}</p>
         <p class="msg-box-art text-left">
-          <span v-for="art in song.ar">{{art.name}}</span>
+          <span>{{song.artist.name}}</span>
         </p>
-        <p class="msg-box-album text-left">{{song.al.name}}</p>
-        <p class="msg-box-time">03:15</p>
+        <p class="msg-box-album text-left">{{song.album.name}}</p>
       </div>
     </div>
   </div>
@@ -57,25 +48,34 @@ import * as SongSheet from "api/SongSheet";
 export default {
   data() {
     return {
-      playlist: {},
-      id:''
-
+      sheet: {},
+      id: "",
+      sheet: {}
     };
   },
   methods: {
     getListDetail() {
-      SongSheet.detail({ id: this.id }).then(res => {
+      SongSheet.getById({ id: this.sheet._id }).then(res => {
         if (res.code == 200) {
-        //   console.log(res);
-          this.playlist = res.playlist;
+          //   console.log(res);
+          console.log(res.data);
+          this.sheet = res.data;
         }
       });
     }
   },
   mounted() {
-    this.id=this.$route.query.id;
-    console.log(this.id)
+    this.sheet._id = this.$route.query.id;
+    // console.log(this.id)
     this.getListDetail();
+  },
+  watch: {
+    $route: {
+      handler: function(newRoute, oldRoute) {
+        this.sheet._id = newRoute.query.id;
+        this.getListDetail();
+      }
+    }
   }
 };
 </script>
@@ -83,11 +83,12 @@ export default {
 @import "scss/index.scss";
 .song-list {
   background: white;
-  padding: 20px;
-      width: 1200px;
-    margin: 20px auto;
-    // box-sizing: content-box;
-    transform: translateY(20px);
+  padding: 40px;
+  width: 1100px;
+  margin: 0px auto;
+  box-sizing: border-box;
+  // box-sizing: content-box;
+  transform: translateY(20px);
   .list-top {
     display: flex;
     .list-top-img {
@@ -156,7 +157,7 @@ export default {
     }
   }
   .list-center {
-    padding: 40px 80px 0 80px;
+    padding: 40px 10px;
     .center-list-tit {
       font-size: 18px;
     }
@@ -183,7 +184,7 @@ export default {
         // border-color: $color-main;;
       }
       .column-two {
-        width: 350px;
+        width: 385px;
       }
       .column-three {
         width: 300px;
@@ -198,7 +199,7 @@ export default {
       display: flex;
       height: 40px;
       line-height: 40px;
-       font-size: 16px;
+      font-size: 16px;
       p {
         //   padding-left: 5px;
         cursor: pointer;
@@ -209,18 +210,19 @@ export default {
       &:nth-child(2n) {
         background: #fbfbfb;
       }
-      &:hover{
-          cursor: pointer;
-           .msg-box-art span,.msg-box-album,.msg-box-time{
-               color: black;
-           }
-           .msg-box-name{
-               color:$color-text-actived
-           }
+      &:hover {
+        cursor: pointer;
+        .msg-box-art span,
+        .msg-box-album,
+        .msg-box-time {
+          color: black;
+        }
+        .msg-box-name {
+          color: $color-text-actived;
+        }
       }
       .msg-box-index {
         width: 50px;
-       
       }
       .msg-box-icon {
         width: 65px;
@@ -235,8 +237,8 @@ export default {
         width: 300px;
         span {
           color: $color-span;
-          &:nth-child(2n){
-              padding-left: 10px;
+          &:nth-child(2n) {
+            padding-left: 10px;
           }
         }
       }

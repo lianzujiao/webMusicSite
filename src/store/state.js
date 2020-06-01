@@ -9,9 +9,9 @@ const state = {
   orderList: [], // 顺序列表
   currentIndex: -1, // 当前音乐索引
   historyList: getHistoryList() || [], // 播放历史列表
-  uid: getUserId() || null, // 网易云用户UID
   user:{email:'',password:''} ,//用户登录信息
   isLogin:null, //是否已经登录
+  collectList:[],//收藏列表
   userToken:''
 }
 

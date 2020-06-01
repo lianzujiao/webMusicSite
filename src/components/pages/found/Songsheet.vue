@@ -1,59 +1,49 @@
 <template>
-  <div class="song-sheet">
-    <el-row>
-      <el-col :span="5">
-        <p class="left-tit" @click="selectedAllCat()">全部</p>
-        <div class="left-box" v-for="(item,index) in list" :key="index">
-          <div class="left-box-tit text-left">
-            <p>{{item.catName}}</p>
-          </div>
-          <div class="left-box-tags">
-            <span
-              class="left-box-tag"
-              v-for="tag in item.tags"
-              @click="selectegTag(tag.name,tag)"
-              :class="{'activedTag':tag.isActived}"
-            >{{tag.name}}</span>
-          </div>
+  <div class="songs-sheet">
+    <div class="songs-sheet-content">
+      <div class="sheet-left-cont">
+        <div
+          class="tag-box"
+          v-for="(tag,index) in tags"
+          @click="selectTag(tag)"
+          :class="{'active-tag':tag.active}"
+        >{{tag.name}}</div>
+      </div>
+      <div class="sheet-right-cont">
+        <div class="sheet-right-tags">
+          <div
+            class="sheet-right-tag"
+            @click="selectAll(item,index)"
+            v-for="(item,index) in ['全部','最新']"
+          >{{item}}</div>
         </div>
-      </el-col>
-      <el-col :span="19">
-        <div class="right-list">
-          <div class="right-tit">
-            <!-- <p>最新</p>
-            <p>最热</p> -->
-          </div>
-          <div class="right-subs">
-            <router-link :to="{path:'/songlist',query:{id:sub.id}}" v-for="(sub,index) in songs" :key="index">
-              <div class="subs-box text-left">
-                <div class="subs-box-img">
-                  <el-image :src="sub.coverImgUrl" lazy>
-                    <div slot="placeholder" class="image-slot">
-                      加载中
-                      <span class="dot">...</span>
-                    </div>
-                  </el-image>
-                  <div class="sub-span text-center">
-                    <i class="el-icon-video-play"></i>
-                  </div>
-                </div>
-                <p>{{sub.name}}</p>
+        <div class="sheet-right-content">
+          <div class="hot-cont" v-for="item in list" :key="item._id">
+            <!-- <div class="hot-cont" v-for="item in hotSongs" :key="item.id"> -->
+            <div class="hot-cont-img">
+              <el-image :src="item.coverImg" title="歌单详情" lazy @click="openSheet(item._id)"></el-image>
+            </div>
+
+            <div class="hot-cont-msg text-left">
+              <div class="hot-cont-span">
+                <p class="icon-pra">
+                  <i class="el-icon-video-play" @click="playSheet(item._id)" title="播放"></i>
+                </p>
+                <p class="icon-pra">
+                  <Icon type="bofangliang" title="播放次数"></Icon>
+                  <span>10</span>
+                </p>
+                <p class="icon-pra">
+                  <Icon type="music" title="总歌曲数"></Icon>
+                  <span>10</span>
+                </p>
               </div>
-            </router-link>
-          </div>
-          <div class="page-list">
-            <el-pagination
-              background
-              layout="prev, pager, next"
-              :total="PageTotal"
-              :page-size="20"
-              :current-page.sync="currentPage"
-              @current-change="handlePage"
-            ></el-pagination>
+              <p class="sheet-name">{{item.name}}</p>
+            </div>
           </div>
         </div>
-      </el-col>
-    </el-row>
+      </div>
+    </div>
   </div>
 </template>
 <script>
@@ -63,213 +53,164 @@ export default {
     return {
       list: [],
       songs: [],
-      cat: "",
-      listParams: {
-        limit: 20,
-        offset: 0,
-        cat: ""
-      },
-      currentPage: 1,
-      PageTotal: 0
+      tags: [
+        { name: "民谣", active: false },
+        { name: "摇滚", active: false },
+        { name: "器乐", active: false },
+        { name: "流行", active: false },
+        { name: "节日", active: false },
+        { name: "风格", active: false },
+        { name: "心情", active: false },
+        { name: "舞曲", active: false }
+      ],
+      pageSize: 8,
+      pageNumber: 1,
+      selectTags: [], //数组为空时表示搜索全部
+      range: "new"
     };
   },
+  watch: {
+    selectTag: {
+      handler: function(newValue, oldValue) {
+        console.log(newValue);
+      },
+      deep: true
+    }
+  },
   methods: {
-    getCatlist() {
-      SongSheet.catlist().then(res => {
+    //选择tags
+    selectTag(tag) {
+      tag.active = !tag.active;
+      if (tag.active) {
+        // this.selectTags.push(tag.name);
+        this.$set(this.selectTags, this.selectTags.length, tag.name);
+      } else {
+        let index = Array.from(this.selectTags).findIndex((item, index) => {
+          return item == tag.name;
+        });
+        if (index > 0) {
+          // this.selectTags.splice(index, 1);
+          this.$delete(this.selectTags, this.selectTags.length, tag.name);
+        }
+      }
+    },
+    selectNew(item, index) {},
+    getSheets() {
+      SongSheet.getByTag({
+        pageSize: this.pageSize,
+        pageNumber: this.pageNumber,
+        tags: this.selectTags,
+        range: this.range
+      }).then(res => {
         if (res.code == 200) {
-          let cate = [];
-          for (let key in res.categories) {
-            cate.push({ catType: key, catName: res.categories[key], tags: [] });
-          }
-          for (let i = 0; i < res.sub.length; i++) {
-            for (let j = 0; j < cate.length; j++) {
-              if (res.sub[i].category == Number(cate[j].catType)) {
-                res.sub[i].isActived = false; //添加一个是否激活属性用于绑定clas
-                cate[j].tags.push(res.sub[i]);
-                break;
-              }
-            }
-          }
-          // console.log(res.sub);
-          this.list = cate;
+          this.list = res.data;
         }
       });
-    },
-    getSongs() {
-      SongSheet.playlist(this.listParams).then(res => {
-        if (res.code == 200) {
-          this.PageTotal = res.total;
-          this.songs = res.playlists;
-        }
-      });
-    },
-
-    //切换页码
-    handlePage(val) {
-      this.listParams = {
-        limit: 20,
-        offset: 20 * (val - 1),
-        cat: this.cat
-      };
-      this.getSongs();
-    },
-
-    //不选中任何一个标签
-    selectedAllCat(){
-       this.list.forEach(li => {
-        li.tags.forEach(item => {
-          item.isActived = false;
-        });
-      });
-      this.currentPage=1;
-       this.listParams = {
-        limit: 20,
-        offset: 0,
-        
-      };
-      this.getSongs();
-    },
-
-    //选中某个标签时
-    selectegTag(tag, item) {
-      this.list.forEach(li => {
-        li.tags.forEach(item => {
-          item.isActived = false;
-        });
-      });
-      this.currentPage=1;
-      item.isActived = true;
-      this.cat=tag;
-      this.listParams = {
-        limit: 20,
-        offset: 0,
-        cat: tag
-      };
-      this.getSongs();
     }
   },
   mounted() {
-    this.getCatlist();
-    this.getSongs();
+    this.getSheets();
   }
 };
 </script>
 <style lang="scss">
 @import "scss/index.scss";
-.song-sheet {
-  background: white;
-  padding: 10px 20px;
-  .left-tit {
-    font-size: 18px;
-    color: white;
-    background: $color-text-actived;
-    width: 50px;
-    line-height: 30px;
-    &:hover {
-      text-decoration: underline;
-      cursor: pointer;
-    }
-  }
-  .left-box {
-    padding: 12px 0 0 0;
-    .left-box-tit {
-      p {
-        font-size: 18px;
-        color: $color-span;
-      }
-    }
-    .left-box-tags {
-      display: flex;
-      flex-wrap: wrap;
-      .left-box-tag {
-        display: block;
-        // margin: 10px 10px 10px 0;
-        padding: 3px 4px;
-        transition: all 0.3s ease-in-out;
-        font-size: 12px;
-        margin: 6px 10px 5px 0;
+.songs-sheet {
+  width: 1000px;
+  margin: 0 auto;
+  .songs-sheet-content {
+    display: flex;
+    width: inherit;
+    height: 100%;
+    padding-bottom: 20px;
+    padding-top: 15px;
+    justify-content: space-between;
+    .sheet-left-cont {
+      width: 16%;
+      .tag-box {
+        background: white;
+        line-height: 50px;
         cursor: pointer;
-        background: #edf7ec;
-        color: #648a63;
-        &:hover {
-          text-decoration: underline;
-          // click时候的效果
+        margin-bottom: 20px;
+        font-size: 18px;
+        color: #999;
+        letter-spacing: 4px;
+      }
+      .active-tag {
+        background-image: url("../../../assets/img/e424322629ebb459adaa8a8d5bcc5965.png");
+        background-repeat: no-repeat;
+        background-size: 25px;
+        background-position: 10px 12px;
+      }
+    }
+    .sheet-right-cont {
+      background: white;
+      min-height: 720px;
+      width: 82%;
+      box-sizing: border-box;
+      padding: 15px 20px;
+      .sheet-right-tags {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 15px;
+        .sheet-right-tag {
+          width: 50px;
+          cursor: pointer;
         }
       }
-      .activedTag {
-        background: $color-text-actived;
-        color: white;
-      }
-    }
-  }
-  .right-list {
-    .right-tit {
-      display: flex;
-      justify-content: flex-end;
-    }
-    .right-subs {
-      padding: 10px 0;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: flex-start;
-      height: 892px;
-      a {
-        margin: 10px 15px 15px 12px;
-        .subs-box {
-          .subs-box-img {
+      .sheet-right-content {
+        display: flex;
+        flex-wrap: wrap;
+        .hot-cont {
+          margin-bottom: 30px;
+          margin-right: 30px;
+          &:nth-child(3n) {
+            margin-right: 0;
+          }
+          .hot-cont-img {
             position: relative;
+            width: 240px;
             overflow: hidden;
-            box-shadow: 0 -1px 5px #b9beb9;
+            //   box-shadow: 5px -5px 5px #c5c2c2;
             img {
-              width: 150px;
-              height: 150px;
-
+              width: 240px;
+              height: 240px;
               transition: all 0.3s ease-in-out;
-            }
-            &:hover {
-              img {
+              &:hover {
                 transform: scale(1.2);
-              }
-              .sub-span {
-                display: block;
+                cursor: pointer;
               }
             }
-            .sub-span {
-              display: none;
-              position: absolute;
-              top: 0;
+          }
+          .hot-cont-msg {
+            .hot-cont-span {
+              display: flex;
+              justify-content: space-between;
               width: 100%;
-              height: 100%;
-              background: rgba(0, 0, 0, 0.5);
-              i {
-                font-size: 40px;
-                color: #d5ebd5;
-                line-height: 150px;
+              .icon-pra {
+                i {
+                  font-size: 16px;
+                  color: $color-text-actived;
+                  cursor: default;
+                }
+                .el-icon-video-play {
+                  cursor: pointer;
+                }
               }
             }
-          }
-          p {
-            width: 150px;
-            -webkit-box-orient: vertical;
-            -webkit-line-clamp: 2;
+            width: 240px;
+            height: 45px;
+            background: #f1f1f1;
             overflow: hidden;
+            .sheet-name {
+              width: 240px;
+              line-height: 31px;
+              height: 30px;
+              text-overflow: ellipsis;
+              overflow: hidden;
+              white-space: nowrap;
+            }
           }
-        }
-      }
-    }
-  }
-  .el-pagination,
-  .is-background {
-    .el-pager {
-      li {
-        &:hover {
-          color: $color-text-actived !important;
-        }
-      }
-      .active {
-        background-color: $color-text-actived !important;
-        &:hover{
-          color:white !important;
         }
       }
     }

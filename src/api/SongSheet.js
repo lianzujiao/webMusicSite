@@ -1,21 +1,29 @@
-import {get,post} from "../util/request"
+import {get,post} from "../http"
 
-//歌单分类
-export const catlist=p=>{
-    return get('/playlist/catlist',p);
+//所有歌单
+export const getAll=p=>{
+    return get('/songSheet/getAll',p);
 }
 
-//热门歌单分类
-export const hot=p=>{
-    return get('/playlist/hot',p);
+//查找歌单
+export const getByName=p=>{
+    return get('/songSheet/findSheet',p)
 }
 
-//歌单，网友精选碟
-export const playlist=p=>{
-    return get('/top/playlist',p);
+//根据类型获取歌单
+export const getByType=p=>{
+    return get('/songSheet/getOneByType',p)
+}
+//根据id获取歌单
+export const getById=p=>{
+    return get('/songSheet/getById',p)
 }
 
-//歌单详情页
-export const detail=p=>{
-    return get('/playlist/detail',p);
+//获取最新歌单
+export const hotSheet=p=>{
+    return get('/songSheet/hot',p)
+}
+//获取最新歌单
+export const getByTag=p=>{
+    return get('/songSheet/getByTag',p)
 }

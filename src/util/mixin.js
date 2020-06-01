@@ -9,7 +9,7 @@ export const listMixin = {
   },
   methods: {
     selectItem(item, index) {
-      if (item.id === this.currentMusic.id && this.playing) {
+      if (item._id === this.currentMusic._id && this.playing) {
         this.setPlaying(false)
       } else {
         this.selectPlay({

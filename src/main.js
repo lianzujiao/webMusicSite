@@ -8,12 +8,14 @@ import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import "./assets/icon/iconfont.css"
 import Icon from "./baseComponets/Icon.vue";
+import  LazyImg from "./baseComponets/LazyImg.vue";
 Vue.config.productionTip = false
 Vue.use(ElementUI)
 
 
 // icon 组件
 Vue.component(Icon.name, Icon)
+Vue.component(LazyImg.name, LazyImg)
 /* eslint-disable no-new */
 new Vue({
   el: '#app',

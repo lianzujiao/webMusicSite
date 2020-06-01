@@ -5,7 +5,7 @@ export const SET_PLAYLIST = 'SET_PLAYLIST' // 修改播放列表
 export const SET_ORDERLIST = 'SET_ORDERLIST' // 修改顺序列表
 export const SET_CURRENTINDEX = 'SET_CURRENTINDEX' // 修改当前音乐索引
 export const SET_HISTORYLIST = 'SET_HISTORYLIST' // 修改播放历史列表
-export const SET_UID = 'SET_UID' // 修改网易云用户UID
 export const SET_USER='SET_USER'//修改当前登录用户
 export const SET_ISlOGIN='SET_ISlOGIN'//判断当前用户是否已经登录
+export const SET_COLLECTLIST='SET_COLLECTLIST'//修改收藏列表
 

@@ -10,7 +10,7 @@ export class Song {
   constructor({ id, name, singer, album, image, duration, url }) {
     this.id = id
     this.name = name
-    this.singer = singer
+    this.artist = singer
     this.album = album
     this.image = image
     this.duration = duration
@@ -18,15 +18,16 @@ export class Song {
   }
 }
 
+//播放列表
 export function createPlayList(music) {
   return new Song({
-    id: music.id,
+    id: music._id,
     name: music.name,
-    singer: music.artists.length > 0 && filterSinger(music.artists),
-    album: music.album.name,
-    image: music.album.picUrl || null,
+    artist: music.artist,
+    album: music.album,
+    image: music.album.coverImg || null,
     duration: music.duration / 1000,
-    url: `https://music.163.com/song/media/outer/url?id=${music.id}.mp3`
+    url: music.src,
   })
 }
 
@@ -42,7 +43,7 @@ export function createTopList(music) {
   })
 }
 
-// 歌曲数据格式化
+// 歌曲列表数据格式化
 const formatSongs = function formatPlayList(list) {
   let Songs = []
   list.forEach(item => {

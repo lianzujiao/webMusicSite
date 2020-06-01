@@ -50,7 +50,7 @@ export default {
   methods: {
     getVolumeIconType() {
     //   return this.isMute ? 'volume-off' : 'volume'
-        return 'laba'
+        return this.isMute?'volume-off': 'laba'
     },
     // 是否静音
     handleToggleVolume() {

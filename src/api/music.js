@@ -1,23 +1,19 @@
-import {get} from "../util/request"
+import {get,post} from "../http"
 
 
-//不可用
-export const url=p=>{
-    return get('/music/url',p)
+export const getByName=p=>{
+    return get('/song/getByName',p)
 }
 
-export const detail=p=>{
-    return get('/song/detail',p)
+//歌曲详情
+export const getOne=p=>{
+    return get('/song/getOne',p)
+}
+
+//添加歌曲播放量
+export const popularity=p=>{
+    return post('/song/popular',p)
 }
 
 
 
-//检查音乐是否有版权
-export const check=p=>{
-    return get('/check/music',p)
-}
-
-//获得歌词
-export const lyric=p=>{
-    return get('/lyric',p)
-}

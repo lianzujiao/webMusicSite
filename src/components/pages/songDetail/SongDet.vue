@@ -1,51 +1,76 @@
 <template>
   <div class="min-width">
     <div class="song-det">
-      <nav>
-        <router-link to="##">
+      <div class="back">
+        <div class="back-btn" @click="back()">
           <i class="iconfont icon-back"></i>
           <span>返回</span>
-        </router-link>
-      </nav>
+        </div>
+      </div>
       <section id="content">
         <div class="det-song-tit">
-          <h2>歌曲名</h2>
+          <h2>{{song.name}}</h2>
           <div class="det-song-right">
             <p class="det-singer">
               <span class="det-span">歌手:</span>
-              <router-link to="##">歌手名</router-link>
+              <router-link to="##" v-if="song.artist">{{song.artist.name}}</router-link>
             </p>
             <p class="det-album">
               <span class="det-span">专辑:</span>
-              <router-link to="##">专辑名</router-link>
+              <router-link to="##" v-if="song.artist">{{song.album.name}}</router-link>
             </p>
           </div>
         </div>
         <div class="det-song-main">
           <div class="det-song-imgbox">
-            <img src="../../../assets/img/banner2.jpg" alt width="400" height="400" />
+            <img :src="song.album.coverImg" alt width="400" height="400" v-if="song.album" />
           </div>
-          <div class="det-song-lyric"></div>
+          <div class="det-song-lyric">
+            <p v-if="song.lyric" :class="{'lyric-fold':isFolded}">{{song.lyric}}</p>
+            <p class="fold-btn" v-if="isFolded" @click="isFolded=false">展开</p>
+            <p class="fold-btn" v-else @click="isFolded=true">收起</p>
+          </div>
         </div>
       </section>
     </div>
   </div>
 </template>
 <script>
-import * as music from "api/music";
+import * as Music from "api/music";
 export default {
   data() {
-    return {};
+    return {
+      song: {
+        _id: ""
+      },
+      isFolded: true
+    };
   },
   methods: {
     getSong() {
-      music.lyric({ id: 1301416320 }).then(res => {
-        console.log(res);
+      Music.getOne({ id: this.song._id }).then(res => {
+        if (res.code == 200) {
+          // console.log(res);
+          this.song = res.data;
+        }
       });
+    },
+    back() {
+      this.$router.go(-1);
     }
   },
   mounted() {
     this.getSong();
+  },
+  watch: {
+    $route: {
+      handler: function(newRoute, oldRoute) {
+        this.song._id = newRoute.query.id;
+        this.getSong()
+      },
+      immediate: true,
+      deep:true
+    }
   }
 };
 </script>
@@ -54,15 +79,18 @@ export default {
 .song-det {
   //   margin: 20px;
   background: white;
-  nav {
+  .back {
     background: $color-del-nav-back;
     box-shadow: 0 -1px 4px 0 rgba(0, 0, 0, 0.06);
-    height: 80px;
-    line-height: 80px;
-    padding: 0 40px;
+    // height: 80px;
+    // line-height: 80px;
+    padding: 20px 40px;
     display: flex;
     justify-content: flex-start;
-    a {
+    .back-btn {
+      height: 30px;
+      line-height: 30px;
+      cursor: pointer;
       span,
       i {
         font-size: 25px;
@@ -95,19 +123,38 @@ export default {
   }
   .det-song-main {
     display: flex;
-    padding: 0 50px;
-    //   height: 380px;
-    background: #ababab;
+    padding: 0 50px 30px 50px;
     .det-song-imgbox {
       box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.3);
       background: rgba(255, 255, 255, 0.85);
       border-radius: 4px;
-      padding: 5px;
       padding: 15px;
-      margin: 50px 0;
+      box-sizing: border-box;
+      width: 390px;
+      height: 390px;
       img {
         width: 360px;
         height: 360px;
+      }
+    }
+    .det-song-lyric {
+      width: 100%;
+      p {
+        word-break: break-all;
+        word-wrap: break-word;
+        white-space: pre-line;
+        font-size: 16px;
+        line-height: 24px;
+      }
+      .lyric-fold {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 18;
+        overflow: hidden;
+      }
+      .fold-btn {
+        color: $color-text-actived;
+        cursor: pointer;
       }
     }
   }

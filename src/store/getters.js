@@ -14,10 +14,13 @@ export const currentIndex = state => state.currentIndex
 export const currentMusic = state => {
   return state.playlist[state.currentIndex] || {}
 }
+//收藏列表
+export const collectList=state=>{
+  return state.collectList;
+}
 // 播放历史列表
 export const historyList = state => state.historyList
-// 网易云用户UID
-export const uid = state => state.uid
+
 //用户登录信息
 export const user=state=>state.user
 //是否已经登录

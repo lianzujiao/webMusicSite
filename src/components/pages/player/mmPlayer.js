@@ -1,4 +1,6 @@
-import { playMode } from '@/config'
+import {
+  playMode
+} from '@/config'
 
 const PlayerMusic = {
   initAudio(that) {
@@ -7,7 +9,7 @@ const PlayerMusic = {
     ele.onprogress = () => {
       try {
         if (ele.buffered.length > 0) {
-          const duration = that.currentMusic.duration
+          const duration = that.currentMusic['duration'];
           let buffered = 0
           ele.buffered.end(0)
           buffered =

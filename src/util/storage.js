@@ -28,7 +28,7 @@ const storage = {
  * @type    HISTORYLIST_KEY：key值
  *          HistoryListMAX：最大长度
  */
-const HISTORYLIST_KEY = '__mmPlayer_historyList__'
+const HISTORYLIST_KEY = '__LPlayer_historyList__'
 const HistoryListMAX = 200
 // 获取播放历史
 export function getHistoryList() {
@@ -72,7 +72,7 @@ export function clearHistoryList() {
  * @type    MODE_KEY：key值
  *          HistoryListMAX：最大长度
  */
-const MODE_KEY = '__mmPlayer_mode__'
+const MODE_KEY = '__LPlayer_mode__'
 // 获取播放模式
 export function getMode() {
   return storage.get(MODE_KEY, null)
@@ -83,20 +83,7 @@ export function setMode(mode) {
   return mode
 }
 
-/**
- * 网易云用户uid
- * @type USERID_KEY：key值
- */
-const USERID_KEY = '__mmPlayer_userID__'
-// 获取用户uid
-export function getUserId() {
-  return Number(storage.get(USERID_KEY, null))
-}
-// 修改用户uid
-export function setUserId(uid) {
-  storage.set(USERID_KEY, uid)
-  return uid
-}
+
 
 //设置登录用户
 export function set_User(user){
@@ -105,26 +92,10 @@ export function set_User(user){
 }
 
 /**
- * 版本号
- * @type VERSION_KEY：key值
- */
-const VERSION_KEY = '__mmPlayer_version__'
-// 获取版本号
-export function getVersion() {
-  let version = storage.get(VERSION_KEY, null)
-  return Array.isArray(version) ? null : version
-}
-// 修改版本号
-export function setVersion(version) {
-  storage.set(VERSION_KEY, version)
-  return version
-}
-
-/**
  * 音量
  * @type VOLUME_KEY：key值
  */
-const VOLUME_KEY = '__mmPlayer_volume__'
+const VOLUME_KEY = '__LPlayer_volume__'
 // 获取音量
 export function getVolume() {
   const volume = storage.get(VOLUME_KEY, defaultVolume)

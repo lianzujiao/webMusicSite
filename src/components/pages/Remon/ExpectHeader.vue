@@ -2,17 +2,17 @@
   <div class="exp-head">
     <div class="left-hot-content">
       <router-link
-        :to="{path:'/songlist',query:{id:item.id}}"
+        :to="{path:'/songlist',query:{id:item._id}}"
         tag="div"
         class="hot-cont"
         v-for="item in list"
-        :key="item.id"
+        :key="item._id"
       >
         <!-- <div class="hot-cont" v-for="item in hotSongs" :key="item.id"> -->
         <div class="hot-cont-img">
-          <el-image :src="item.coverImgUrl" lazy />
+          <el-image :src="item.coverImg" lazy />
           <div class="hot-cont-span">
-            <i class="el-icon-video-play"></i>
+            <i class="el-icon-video-play" @click="playSong(item._id)"></i>
           </div>
         </div>
         <p>{{item.name}}</p>
@@ -22,39 +22,46 @@
   </div>
 </template>
 <script>
+import * as Sheet from "api/SongSheet";
+import * as Music from "api/music";
+import { mapMutations, mapActions } from "vuex";
 export default {
-    name:"ExpHeader",
+  name: "ExpHeader",
   data() {
     return {
-      list: [
-        {
-          id: 0,
-          coverImgUrl: require("../../../assets/img/cla/1.jpg"),
-          name: "午后红茶"
-        },
-        {
-          id: 1,
-          coverImgUrl: require("../../../assets/img/cla/2.jpg"),
-          name: "工作学习"
-        },
-        {
-          id: 2,
-          coverImgUrl: require("../../../assets/img/cla/3.jpg"),
-          name: "深夜居酒屋"
-        },
-        {
-          id: 3,
-          coverImgUrl: require("../../../assets/img/cla/4.jpg"),
-          name: "周末聚会"
-        },
-        {
-          id: 4,
-          coverImgUrl: require("../../../assets/img/cla/5.jpg"),
-          name: "放松心情"
-        }
-      ]
+      list: [],
+      sheetId: ""
     };
-  }
+  },
+  methods: {
+    getList() {
+      Sheet.getByType({ type: 1 }).then(res => {
+        if (res.code == 200) {
+          this.list = res.data;
+        }
+      });
+    },
+    //播放时将歌单列表添加到播放列表
+    async playSong(id) {
+      const sheetRes = await Sheet.getById({ id: id });
+      let list = [];
+      if (sheetRes.code == 200) {
+        list = sheetRes.data.songs;
+        this.setPlaylist({list:list});
+        this.setCurrentIndex(0);
+        this.setPlaying(true);
+      }
+    },
+    ...mapMutations({
+      setPlaying: "SET_PLAYING",
+      setCurrentIndex: "SET_CURRENTINDEX"
+    }),
+    ...mapActions(["setPlaylist"])
+  },
+  mounted() {
+    this.getList();
+  },
+  watch: {}
 };
 </script>
 <style lang="scss">
@@ -65,11 +72,11 @@ export default {
     justify-content: space-between;
     flex-wrap: wrap;
     .hot-cont {
-    //   margin: 10px;
+      //   margin: 10px;
       cursor: pointer;
       margin-right: 1px;
-      &:nth-child(5){
-          margin-right: 0px;
+      &:nth-child(5) {
+        margin-right: 0px;
       }
       .hot-cont-img {
         position: relative;
@@ -114,10 +121,10 @@ export default {
         text-align: center;
         line-height: 42px;
       }
-      &:hover{
-          p{
-              color:$color-text-actived
-          }
+      &:hover {
+        p {
+          color: $color-text-actived;
+        }
       }
     }
   }

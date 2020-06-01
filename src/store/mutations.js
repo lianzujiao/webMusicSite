@@ -25,25 +25,25 @@ const mutations = {
   [types.SET_CURRENTINDEX](state, currentIndex) {
     state.currentIndex = currentIndex
   },
+  //修改收藏列表
+  [types.SET_COLLECTLIST](state,collectList){
+    state.collectList=collectList
+  },
   // 修改播放历史列表
   [types.SET_HISTORYLIST](state, historyList) {
     state.historyList = historyList
-  },
-  // 修改网易云用户UID
-  [types.SET_UID](state, uid) {
-    state.uid = uid
   },
   //设置当前用户
   [types.SET_USER](state, user) {
     if (user) {
       state.user = user;
-        } else{
+    } else {
       state.user = {
         email: '',
         password: ''
       }
     }
-    
+
   },
   //判断是否已经登录
   [types.SET_ISlOGIN](state, isLogin) {

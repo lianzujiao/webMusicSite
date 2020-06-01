@@ -6,6 +6,48 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "8224464",
+      "name": "音乐",
+      "font_class": "music",
+      "unicode": "e600",
+      "unicode_decimal": 58880
+    },
+    {
+      "icon_id": "7415856",
+      "name": "播放量",
+      "font_class": "bofangliang",
+      "unicode": "e61b",
+      "unicode_decimal": 58907
+    },
+    {
+      "icon_id": "2225178",
+      "name": "icon_历史播放",
+      "font_class": "historyList",
+      "unicode": "e686",
+      "unicode_decimal": 59014
+    },
+    {
+      "icon_id": "7152433",
+      "name": "实心",
+      "font_class": "offLike",
+      "unicode": "e6ac",
+      "unicode_decimal": 59052
+    },
+    {
+      "icon_id": "1998256",
+      "name": "顺序播放",
+      "font_class": "sequence",
+      "unicode": "e617",
+      "unicode_decimal": 58903
+    },
+    {
+      "icon_id": "7162362",
+      "name": "静音",
+      "font_class": "volume-off",
+      "unicode": "e747",
+      "unicode_decimal": 59207
+    },
+    {
       "icon_id": "5343668",
       "name": "前进",
       "font_class": "-next-card",
@@ -64,14 +106,14 @@
     {
       "icon_id": "2154283",
       "name": "单曲循环_32",
-      "font_class": "one",
+      "font_class": "loop-one",
       "unicode": "e66d",
       "unicode_decimal": 58989
     },
     {
       "icon_id": "1159898",
       "name": "随机播放",
-      "font_class": "random-play",
+      "font_class": "random",
       "unicode": "e622",
       "unicode_decimal": 58914
     },

@@ -3,14 +3,15 @@
     <!-- <img src="./assets/logo.png"> -->
     <router-view/>
      <!--播放器-->
-    <audio ref="mmPlayer"></audio>
+    <audio ref="mmPlayer"  @durationchange="audioDurationChange()"></audio>
   </div>
 </template>
 
 <script>
 import jwt_decode from "jwt-decode";
-import { mapMutations, mapActions } from 'vuex';
+import { mapMutations, mapActions, mapGetters } from 'vuex';
 import * as user from "api/user"
+
 export default {
   name: 'App',
   created(){
@@ -26,11 +27,17 @@ export default {
   }
 
   },
+  computed:{
+    ...mapGetters(['currentMusic','audioEle'])
+  },
   methods:{
     ...mapMutations({
       setAudioele: 'SET_AUDIOELE',
 
     }),
+    audioDurationChange(){
+      this.currentMusic.duration=this.audioEle.duration;
+    },
   },
   mounted(){
    
@@ -67,5 +74,8 @@ export default {
   /* Better Font Rendering =========== */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+.pointer{
+  cursor: pointer;
 }
 </style>

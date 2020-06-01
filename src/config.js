@@ -1,6 +1,9 @@
 //默认音量
 export const defaultVolume=0.8;
 
+//默认歌曲图片
+export const defaultBG="https://songtaste.oss-cn-beijing.aliyuncs.com/defaultBg.png"
+
 /**
  * 播放模式
  * listLoop: 列表循环

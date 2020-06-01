@@ -14,7 +14,7 @@
           </el-col>
           <!-- <el-col :span="5">
             <router-link to="/home" class="head-link" active-class="head-actived">云音乐</router-link>
-          </el-col> -->
+          </el-col>-->
           <!-- <el-col :span="5" class="head-found">
             <router-link to="/found" class="head-link" active-class="head-actived">发现</router-link>
             <div class="foun-box">
@@ -33,12 +33,17 @@
       <el-col :span="8">
         <el-row>
           <el-col :span="16">
-            <el-input prefix-icon="el-icon-search" v-model="search" placeholder="搜索内容"></el-input>
+            <el-input
+              prefix-icon="el-icon-search"
+              v-model.trim="search"
+              placeholder="搜索内容"
+              @keyup.enter.native="find($event)"
+            ></el-input>
           </el-col>
           <el-col :span="8">
             <div class="user-avator" v-if="LoginUser.email!=''" @click="gotoSelfPage()">
-              <img :src="LoginUser.avator" alt="">
-              </div>
+              <img :src="LoginUser.avator" alt />
+            </div>
             <p v-else class="sign-in" @click="centerDialogVisible = true">登录</p>
           </el-col>
         </el-row>
@@ -72,8 +77,9 @@
 
 <script>
 import * as user from "api/user";
-import { mapGetters } from "vuex";
-import jwt_decode from "jwt-decode"
+import { findSongs } from "api/colSong";
+import { mapGetters, mapMutations } from "vuex";
+import jwt_decode from "jwt-decode";
 export default {
   name: "HelloWorld",
   data() {
@@ -106,18 +112,10 @@ export default {
             .then(res => {
               if (res.code == 200) {
                 this.centerDialogVisible = false;
-              //   this.$store.commit("SET_USER", {
-              //     email: this.userForm.email,
-              //     password: this.userForm.password,
-              //     avator:res.data.avator
-              //   });
-              //  storage.set('token',res.token)
-              const token=res.token
-              localStorage.setItem('user',token)
-              const decode=jwt_decode(token)
-              
-              console.log(typeof(decode) )
-              this.$store.dispatch('setUser',decode)
+                const token = res.token;
+                localStorage.setItem("user", token);
+                const decode = jwt_decode(token);
+                this.$store.dispatch("setUser", decode);
               } else {
                 this.$message({ type: "warning", message: "账号或密码错误" });
               }
@@ -136,16 +134,37 @@ export default {
     //个人主页
     gotoSelfPage() {
       this.$router.push({ path: "/selfPage" });
-    }
+    },
+    //搜索回车
+    find(event) {
+      if (this.search == "") {
+        return false;
+      }
+      this.$router.push({ path: "/search", query: { key: this.search } });
+    },
+    //获取用户收藏的歌曲
+    //获取用户收藏列表
+    async getColSongs(user) {
+      if (user.id == "") {
+        return;
+      }
+      return await findSongs({ userId: user.id });
+    },
+    ...mapMutations({ setCollectList: "SET_COLLECTLIST" })
   },
   computed: {
     ...mapGetters({ LoginUser: "user" })
   },
   watch: {
     LoginUser: {
-      handler: function(newValue, oldValue) {
-        // console.log(JSON.parse(JSON.stringify(newValue)) )
-        // console.log(newValue);
+      handler: function(newUser, oldUser) {
+        if (newUser.id !== "") {
+          this.getColSongs(newUser).then(res => {
+            if (res.code == 200) {
+              this.setCollectList(res.data);
+            }
+          });
+        }
       },
       immediate: true
     }
@@ -201,12 +220,13 @@ export default {
     color: $color-text-actived;
     cursor: pointer;
   }
-  .user-avator{
+  .user-avator {
     cursor: pointer;
-    img{
-      width: 80px;
-      height: 80px;
+    img {
+      width: 50px;
+      height: 50px;
       border-radius: 50%;
+      transform: translateY(12px);
     }
   }
 

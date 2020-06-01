@@ -156,10 +156,11 @@ export default {
   .progress-inner {
     position: absolute;
     // top: 0px;
+    background: $color-text-actived;
     left: 5px;
     display: inline-block;
     width: 0;
-    height: 2px;
+    height: 1px;
     margin-top: -1px;
     // background: @line_color;
     .progress-dot {
