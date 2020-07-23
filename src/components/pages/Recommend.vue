@@ -25,7 +25,6 @@
   </div>
 </template>
 <script>
-import Classic from "components/pages/Remon/Classic";
 import BandList from "components/pages/Remon/BandList";
 import BandNews from "components/pages/Remon/BandNews";
 import ExpList from "components/pages/Remon/ExpectList";
@@ -35,7 +34,6 @@ import ExpSheets from "components/pages/Remon/ExpSheets";
 
 export default {
   components: {
-    "v-classic": Classic,
     "v-bandList": BandList,
     "v-bandNews": BandNews,
     "v-explist": ExpList,

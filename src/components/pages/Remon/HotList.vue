@@ -93,7 +93,7 @@
               <span class="common-msg-name-index">{{index+1}}</span>
               <span class="common-msg-name-dea">{{item.name}}</span>
             </router-link>
-            <router-link to="##" class="common-msg-artist">{{item.artist.name}}</router-link>
+            <router-link :to="{path:'singer',query:{id:item.artist._id}}" class="common-msg-artist">{{item.artist.name}}</router-link>
           </div>
         </div>
       </div>

@@ -13,11 +13,12 @@ export default {
 <style lang="scss">
 @import "scss/index.scss";
     .footer{
-        height: 150px;
+        height: 50px;
         color: $color-span;
-        line-height: 150px;
+        line-height: 50px;
         // background: $color-main;
         margin-bottom: 72px;
+        border-top: 1px solid $color-main;
 
         
     }

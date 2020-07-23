@@ -2,12 +2,12 @@
   <div class="band-list">
     <div class="band-list-tit">
       <h2>音乐人</h2>
-      <router-link to="/recommend/bandtag">查看更多</router-link>
+      <router-link to="bands">查看全部</router-link>
     </div>
     <div class="bands-box">
-      <router-link to="/recommend/band" v-for="(band,index) in bands" :key="index">
+      <router-link :to="{path:'singer',query:{id:band._id}}" v-for="(band,index) in bands" :key="index">
         <div class="ban-img-box">
-          <img :src="band.img" alt srcset />
+          <img :src="band.coverImg" alt  />
         </div>
         <p>{{band.name}}</p>
       </router-link>
@@ -15,21 +15,25 @@
   </div>
 </template>
 <script>
+import * as Singer from "api/singer";
 export default {
   name: "bandList",
   data() {
     return {
-      bands: [
-        {
-          name: "BongBong邦邦乐团",
-          img: require("assets/img/bandlist/bongbong.jpg")
-        },
-        { name: "Click#15", img: require("assets/img/bandlist/click5.jpg") },
-        { name: "MLK麋鹿王国", img: require("assets/img/bandlist/mlk.jpg") },
-        { name: "Mr.WooHoo", img: require("assets/img/bandlist/woohoo.jpg") },
-        { name: "Mr.Miss", img: require("assets/img/bandlist/mrmiss.jpg") }
-      ]
+      bands: []
     };
+  },
+  methods: {
+    getSingers() {
+      Singer.hot().then(res => {
+        if (res.code == 200) {
+          this.bands = res.data;
+        }
+      });
+    }
+  },
+  mounted() {
+    this.getSingers();
   }
 };
 </script>

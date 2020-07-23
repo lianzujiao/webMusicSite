@@ -15,6 +15,7 @@ const PlayerMusic = {
           buffered =
             ele.buffered.end(0) > duration ? duration : ele.buffered.end(0)
           that.currentProgress = buffered / duration
+
         }
       } catch (e) {}
     }
@@ -40,7 +41,6 @@ const PlayerMusic = {
     }
     // 音乐播放出错
     ele.onerror = () => {
-      // that.$mmToast('当前音乐不可播放，已自动播放下一曲')
       that.next()
       // console.log('播放出错啦！')
     }
@@ -58,7 +58,7 @@ const PlayerMusic = {
     ele.oncanplay = () => {
       if (
         that.historyList.length === 0 ||
-        that.currentMusic.id !== that.historyList[0].id
+        that.currentMusic._id !== that.historyList[0]._id
       ) {
         that.setHistory(that.currentMusic)
       }

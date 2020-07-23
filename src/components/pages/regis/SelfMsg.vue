@@ -90,6 +90,7 @@ export default {
             intro:this.form.intro
         }).then(res=>{
             if(res.code==200){
+              
                 this.$message({
                     type:'success',
                     message:"资料修改成功"

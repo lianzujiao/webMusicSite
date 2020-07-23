@@ -4,15 +4,15 @@
       <p class="right-top-tit">编辑精选</p>
       <p class="right-top-play" @click="playList()">播放</p>
     </el-row>
-    <el-row v-for="item in list" :key="item._id" class="right-bot text-left" @click.native="openSong(item._id)">
+    <el-row v-for="item in list" :key="item._id" class="right-bot text-left">
       <el-col :span="9">
         <div class="right-bot-songPic">
           <el-image :src="item.album.coverImg" style="width:80px ;height:80px" lazy />
         </div>
       </el-col>
       <el-col :span="15" class="right-bot-name">
-        <p>{{item.name}}</p>
-        <p >{{item.artist.name}}</p>
+        <p @click="openSong(item._id)">{{item.name}}</p>
+        <p @click="openSinger(item.artist._id)">{{item.artist.name}}</p>
       </el-col>
     </el-row>
   </div>
@@ -24,30 +24,29 @@ export default {
   name: "ExpList",
   data() {
     return {
-           list: []
+      list: []
     };
   },
   methods: {
-    
     //播放全部
     playList() {
-      if(this.list.length<=0){
+      if (this.list.length <= 0) {
         return false;
       }
-      this.setPlaylist({list:this.list});
+      this.setPlaylist({ list: this.list });
       this.setCurrentIndex(0);
-      this.setPlaying(true)
-
-
+      this.setPlaying(true);
     },
     //歌曲详情
     openSong(id) {
-    
-      this.$router.push({path:"songDetail",query:{id:id}})
+      this.$router.push({ path: "songDetail", query: { id: id } });
     },
-    
+    openSinger(id){
+      this.$router.push({path:"singer",query:{id:id}})
+    },
+
     getList() {
-      Rank.getById({ id: "5ea1b6a85124161afccb61c7" }).then(res => {
+      Rank.getById({ id: "5ee62d195309ef3850997a1d" }).then(res => {
         if (res.code == 200) {
           this.list = res.data.songs;
         }
@@ -90,7 +89,11 @@ export default {
   }
   .right-bot {
     padding: 7px 0;
-    cursor: pointer;
+    .right-bot-songPic{
+      img{
+        border-radius: 5px;
+      }
+    }
     p {
       font-size: $font-size-15;
     }
@@ -101,6 +104,10 @@ export default {
       justify-content: space-between;
       box-sizing: border-box;
       padding: 2px 0 10px 8px;
+      p {
+        cursor: pointer;
+      }
+
       p:nth-child(2) {
         color: $color-span;
       }

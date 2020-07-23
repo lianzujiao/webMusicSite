@@ -1,80 +1,104 @@
 <template>
-  <div class="song-list">
-    <div class="list-top">
-      <div class="list-top-img">
-        <img :src="sheet.coverImg" alt=""/>
-      </div>
-      <div class="list-top-msg text-left">
-        <div class="top-msg-name">
-          <span>歌单</span>
-          {{sheet.name}}
-          <!-- <span class="top-msg-span">歌曲数:{{sheet.songs.length}}</span> -->
+  <div class="min-width">
+    <div class="song-list">
+      <div class="list-top">
+        <div class="list-top-img">
+          <img :src="sheet.coverImg" alt />
         </div>
+        <div class="list-top-msg text-left">
+          <div class="top-msg-name">
+            <span>歌单</span>
+            {{sheet.name}}
+          </div>
 
-        <div class="msg-btn">
-          <p class="btn-play">
-            <i class="iconfont iconplay"></i>播放
+          <div class="msg-btn">
+            <p class="btn-play" @click="playSheet()">
+              <i class="iconfont iconplay"></i>播放
+            </p>
+          </div>
+
+          <p class="msg-intro">
+            简介:
+            <span>{{sheet.desc}}</span>
           </p>
-          <!-- <p class="btn-add">添加</p> -->
         </div>
-     
-        <p class="msg-intro">
-          简介:
-          <span>{{sheet.desc}}</span>
-        </p>
       </div>
-    </div>
-    <div class="list-center">
-      <p class="center-list-tit text-left">歌曲列表</p>
-      <div class="list-column text-left">
-        <p class="column-two">音乐标题</p>
-        <p class="column-three">歌手</p>
-        <p class="column-four">专辑</p>
-      </div>
-      <div class="song-msg-box" v-for="(song,index) in sheet.songs" :key="index">
-        <p class="msg-box-index">{{index+1}}</p>
-
-        <p class="msg-box-name text-left">{{song.name}}</p>
-        <p class="msg-box-art text-left">
-          <span>{{song.artist.name}}</span>
-        </p>
-        <p class="msg-box-album text-left">{{song.album.name}}</p>
+      <div class="list-center">
+        <p class="center-list-tit text-left">曲目</p>
+        <div class="end-songs" v-if="sheet.songs">
+          <div class="end-song-box" v-for="(song,index) in sheet.songs" :key="index">
+            <p class="end-song-index">{{index+1}}</p>
+            <div class="end-song-img">
+              <img :src="song.album.coverImg" />
+            </div>
+            <div class="end-song-name">
+              <div class="end-song-name-item">
+                <router-link :to="{path:'songDetail',query:{id:song._id}}">{{song.name}}</router-link>
+              </div>
+              <div class="end-song-name-item">
+                <router-link :to="{path:'singer',query:{id:song.artist._id}}">{{song.artist.name}}</router-link>
+              </div>
+            </div>
+            <div class="end-song-popular">
+              <Icon type="bofangliang" title="播放量" />
+              <span>{{song.popularity}}</span>
+            </div>
+            <div class="end-song-play">
+              <Icon type="bofang" @click="playSong(song._id,index)" />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 <script>
 import * as SongSheet from "api/SongSheet";
+import { mapActions, mapMutations } from "vuex";
 export default {
   data() {
     return {
       sheet: {},
-      id: "",
-      sheet: {}
+      id: ""
     };
   },
   methods: {
     getListDetail() {
       SongSheet.getById({ id: this.sheet._id }).then(res => {
         if (res.code == 200) {
-          //   console.log(res);
-          console.log(res.data);
           this.sheet = res.data;
         }
       });
-    }
+    },
+    playSheet() {
+      this.setPlaylist({ list: this.sheet.songs });
+      this.setCurrentIndex(0);
+      this.setPlaying(true);
+    },
+    playSong(id, index) {
+      this.setPlaylist({ list: this.sheet.songs });
+      this.setCurrentIndex(index);
+      this.setPlaying(true);
+    },
+    ...mapMutations({
+      setPlaying: "SET_PLAYING",
+      setCurrentIndex: "SET_CURRENTINDEX"
+    }),
+    ...mapActions(["setPlaylist"])
   },
   mounted() {
-    this.sheet._id = this.$route.query.id;
-    // console.log(this.id)
-    this.getListDetail();
+    // this.sheet._id = this.$route.query.id;
+    // // console.log(this.id)
+    // this.getListDetail();
   },
   watch: {
     $route: {
       handler: function(newRoute, oldRoute) {
         this.sheet._id = newRoute.query.id;
         this.getListDetail();
-      }
+      },
+      deep: true,
+      immediate: true
     }
   }
 };
@@ -83,14 +107,12 @@ export default {
 @import "scss/index.scss";
 .song-list {
   background: white;
-  padding: 40px;
-  width: 1100px;
+  padding: 20px 40px;
   margin: 0px auto;
   box-sizing: border-box;
-  // box-sizing: content-box;
-  transform: translateY(20px);
   .list-top {
     display: flex;
+    padding: 20px;
     .list-top-img {
       border: 1px solid $color-main;
       padding: 8px;
@@ -128,6 +150,7 @@ export default {
           line-height: 40px;
           font-size: 18px;
           letter-spacing: 3px;
+          cursor: pointer;
           i {
             color: white;
             font-size: 28px;
@@ -159,99 +182,93 @@ export default {
   .list-center {
     padding: 40px 10px;
     .center-list-tit {
-      font-size: 18px;
+      font-size: 20px;
+      border-bottom: 2px solid $color-main;
+      line-height: 35px;
     }
-    .list-column {
-      display: flex;
-      padding: 0 5px;
-      //   line-height:;
-      border-top: 1px solid gray;
-      border-bottom: 1px solid gray;
-      margin: 10px 0 0 0;
-      border-color: $color-main;
-      p {
-        line-height: 30px;
-        border-left: 1px solid;
-        // border-right: 1px solid;
-        border-color: $color-main;
-        padding-left: 5px;
-      }
-      .column-one {
-        width: 50px;
-        // border-left: 1px solid;
-        border-right: 1px solid $color-main;
-        margin-left: 50px;
-        // border-color: $color-main;;
-      }
-      .column-two {
-        width: 385px;
-      }
-      .column-three {
-        width: 300px;
-      }
-      .column-four {
-        width: 170px;
-      }
-      .column-last {
-      }
-    }
-    .song-msg-box {
-      display: flex;
-      height: 40px;
-      line-height: 40px;
-      font-size: 16px;
-      p {
-        //   padding-left: 5px;
-        cursor: pointer;
-      }
-      &:nth-child(2n + 1) {
-        background: #efefef;
-      }
-      &:nth-child(2n) {
-        background: #fbfbfb;
-      }
-      &:hover {
-        cursor: pointer;
-        .msg-box-art span,
-        .msg-box-album,
-        .msg-box-time {
-          color: black;
+
+    .end-songs {
+      padding-top: 15px;
+      min-height: 500px;
+      .end-song-box {
+        display: flex;
+        padding: 8px 0 8px 0;
+        border-bottom: 1px solid #ebebeb;
+        .end-song-index {
+          width: 60px;
+          font-size: 16px;
+          line-height: 65px;
         }
-        .msg-box-name {
-          color: $color-text-actived;
-        }
-      }
-      .msg-box-index {
-        width: 50px;
-      }
-      .msg-box-icon {
-        width: 65px;
-      }
-      .msg-box-name {
-        width: 350px;
-        -webkit-box-orient: vertical;
-        -webkit-line-clamp: 1;
-        overflow: hidden;
-      }
-      .msg-box-art {
-        width: 300px;
-        span {
-          color: $color-span;
-          &:nth-child(2n) {
-            padding-left: 10px;
+        .end-song-img {
+          width: 80px;
+          img {
+            width: 65px;
+            border-radius: 8px;
           }
         }
-      }
-      .msg-box-album {
-        width: 170px;
-        color: $color-span;
-        display: -webkit-box;
-        -webkit-box-orient: vertical;
-        -webkit-line-clamp: 1;
-        overflow: hidden;
-      }
-      .msg-box-time {
-        color: $color-span;
+        .no-index-img {
+          margin-left: 60px;
+        }
+        .end-song-name {
+          padding: 8px 0 8px 25px;
+          width: 300px;
+          text-align: left;
+          .end-song-name-item {
+            a {
+              font-size: 16px;
+              line-height: 25px;
+            }
+
+            a:hover {
+              color: $color-text-actived;
+            }
+          }
+          .end-song-name-item:nth-child(2) {
+            a {
+              font-size: 14px;
+            }
+          }
+        }
+
+        .end-song-popular {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          padding: 0 25px;
+          i {
+            font-size: 23px;
+            color: #d4d4d4;
+          }
+          span {
+            font-size: 16px;
+          }
+        }
+        .end-song-like {
+          padding: 14px 25px;
+          // line-height: 68px;
+          i {
+            font-size: 28px;
+            color: #d4d4d4;
+          }
+        }
+        .end-song-play {
+          padding: 16px 25px;
+          display: none;
+          i {
+            font-size: 24px;
+            // line-height: 68px;
+            color: #b3b3b3;
+          }
+          i:hover {
+            color: $color-text-actived;
+          }
+        }
+        &:hover {
+          background: #ebebeb47;
+          .end-song-play {
+            display: block;
+          }
+        }
       }
     }
   }

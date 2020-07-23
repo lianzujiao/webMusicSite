@@ -2,7 +2,7 @@
   <div class="head">
     <el-row>
       <el-col :span="8">
-        <el-row>
+        <el-row class="head-nav">
           <el-col :span="5">
             <router-link to="/recommend" class="head-link" active-class="head-actived">迷乐</router-link>
           </el-col>
@@ -12,17 +12,6 @@
           <el-col :span="5">
             <router-link to="/show" class="head-link" active-class="head-actived">演出</router-link>
           </el-col>
-          <!-- <el-col :span="5">
-            <router-link to="/home" class="head-link" active-class="head-actived">云音乐</router-link>
-          </el-col>-->
-          <!-- <el-col :span="5" class="head-found">
-            <router-link to="/found" class="head-link" active-class="head-actived">发现</router-link>
-            <div class="foun-box">
-              <router-link to="/found/ranklist">榜单</router-link>
-              <router-link to="/found/singers">歌手</router-link>
-              <router-link to="/found/songsheet">歌单</router-link>
-            </div>
-          </el-col>-->
         </el-row>
       </el-col>
       <el-col :span="8">
@@ -32,7 +21,7 @@
       </el-col>
       <el-col :span="8">
         <el-row>
-          <el-col :span="16">
+          <el-col :span="16" class="head-search">
             <el-input
               prefix-icon="el-icon-search"
               v-model.trim="search"
@@ -41,8 +30,11 @@
             ></el-input>
           </el-col>
           <el-col :span="8">
-            <div class="user-avator" v-if="LoginUser.email!=''" @click="gotoSelfPage()">
-              <img :src="LoginUser.avator" alt />
+            <div class="user-avator" v-if="Object.keys(LoginUser).length!==0">
+              <div class="login-img">
+                <img :src="LoginUser.avator" alt @click="gotoSelfPage()" />
+                <router-link class="login-out" to="selfPage">{{LoginUser.name}}</router-link>
+              </div>
             </div>
             <p v-else class="sign-in" @click="centerDialogVisible = true">登录</p>
           </el-col>
@@ -61,7 +53,7 @@
           <el-input v-model="userForm.email" class="login-input"></el-input>
         </el-form-item>
         <el-form-item label="密码" prop="password">
-          <el-input v-model="userForm.password" class="login-input"></el-input>
+          <el-input type="password" v-model="userForm.password" class="login-input"></el-input>
         </el-form-item>
         <el-form-item class="login-btn">
           <el-button type="primary" @click=" submit('userForm')">登录</el-button>
@@ -78,7 +70,7 @@
 <script>
 import * as user from "api/user";
 import { findSongs } from "api/colSong";
-import { mapGetters, mapMutations } from "vuex";
+import { mapGetters, mapMutations, mapActions } from "vuex";
 import jwt_decode from "jwt-decode";
 export default {
   name: "HelloWorld",
@@ -91,7 +83,14 @@ export default {
         password: ""
       },
       rules: {
-        email: [{ required: true, message: "请输入邮箱", trigger: "blur" }],
+        email: [
+          {
+            type: "email",
+            required: true,
+            message: "请输入邮箱",
+            trigger: "blur"
+          }
+        ],
         password: [
           { required: true, message: "请输入密码", trigger: "blur" },
           { min: 6, max: 9, message: "长度在 6 到 9 个字符", trigger: "blur" }
@@ -100,6 +99,7 @@ export default {
     };
   },
   methods: {
+    ...mapActions(["clearUser"]),
     open() {},
     submit(formName) {
       this.$refs[formName].validate(valid => {
@@ -142,6 +142,10 @@ export default {
       }
       this.$router.push({ path: "/search", query: { key: this.search } });
     },
+    //退出登录
+    loginOut() {
+      this.clearUser();
+    },
     //获取用户收藏的歌曲
     //获取用户收藏列表
     async getColSongs(user) {
@@ -158,7 +162,7 @@ export default {
   watch: {
     LoginUser: {
       handler: function(newUser, oldUser) {
-        if (newUser.id !== "") {
+        if (typeof(newUser.id)!="undefined") {
           this.getColSongs(newUser).then(res => {
             if (res.code == 200) {
               this.setCollectList(res.data);
@@ -177,8 +181,11 @@ export default {
 @import "scss/index.scss";
 .head {
   height: 80px;
-  line-height: 80px;
+  // line-height: 80px;
   padding: 0 25px;
+  .head-nav{
+    line-height: 80px;
+  }
   .head-link {
     &:hover {
       color: $color-text-actived;
@@ -200,6 +207,9 @@ export default {
       width: 130px;
     }
   }
+  .head-search{
+    line-height: 80px;
+  }
   .el-input {
     max-width: 212px;
     .el-input__inner {
@@ -219,14 +229,29 @@ export default {
     font-size: $font-size-16;
     color: $color-text-actived;
     cursor: pointer;
+    line-height: 80px;
   }
   .user-avator {
-    cursor: pointer;
-    img {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      transform: translateY(12px);
+    // cursor: pointer;
+    .login-img {
+      width: 60px;
+      margin: 0 auto;
+      padding: 5px 0;
+      
+      img {
+        display: inline-block;
+        width: 45px;
+        height: 45px;
+        border: 1px solid $color-text-actived;
+        border-radius: 50%;
+        cursor: pointer;
+        
+      }
+    }
+    .login-out {
+      // line-height: 25px;
+      color: $color-text-actived;
+      font-size: 16px;
     }
   }
 
@@ -267,30 +292,32 @@ export default {
     }
   }
   .el-dialog__header {
-    padding: 0px 20px 0px;
+    padding: 10px 20px 10px;
     background: $color-del-nav-back;
     span {
       font-size: 20px;
       color: $color-span;
     }
-    /* font-size: 20px; */
-    .demo-userForm {
-      .el-form-item__label {
-        font-size: 18px;
-      }
-    }
   }
   .login-input {
-    max-width: 240px;
+    max-width: 80%;
     .el-input__inner {
       border-radius: 5px;
-      height: 42px;
+      height: 55px;
+    }
+  }
+  .demo-userForm {
+    .el-form-item__label {
+      line-height: 55px;
+      font-size: 18px;
     }
   }
   .login-btn {
     // margin-left: 50%;
     .el-form-item__content {
-      margin-left: 170px !important;
+      display: flex;
+      justify-content: center;
+      margin: 0 !important;
       .el-button--primary {
         background: $color-text-actived;
         border-color: $color-text-actived;

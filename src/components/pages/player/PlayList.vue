@@ -1,55 +1,69 @@
 <template>
-  <div class="play-list">
-    <div class="list-tit">
-      <div
-        class="list-tit-left list-tit-item"
-        @click="changeList(1)"
-        :class="{'item-active':listType==1}"
-      >
-        <Icon type="playingList"></Icon>
-        <span>当前列表</span>
-      </div>
-      <div
-        class="list-tit-right list-tit-item"
-        @click="changeList(2)"
-        :class="{'item-active':listType==2}"
-      >
-        <Icon type="historyList"></Icon>
-        <span>播放历史</span>
-      </div>
-    </div>
-    <div class="list-del text-right pointer" v-if="showBtn()" @click="removeAll()">清空</div>
-    <div class="list-box">
-      <template v-if="[...playlist].length!==0&&listType==1">
-        <div class="song-box" v-for="(song,index) in playlist" :key="song._id">
-          <Icon
-            title="播放/暂停歌曲"
-            :type="getPlayIconType(song)"
-            class="pointer"
-            @click.self="selectItem(song,index)"
-          />
-
-          <p class="song-name text-left">{{song.name}}</p>
-          <Icon type="delete" title="从播放列表删除" @click="delSong(index)" />
+  <div class="play-list-box">
+    <div class="play-list">
+      <div class="list-tit">
+        <div
+          class="list-tit-left list-tit-item"
+          @click="changeList(1)"
+          :class="{'item-active':listType==1}"
+        >
+          <Icon type="playingList"></Icon>
+          <span>当前列表</span>
         </div>
-      </template>
-      <template v-if="listType==2">
-        <div class="song-box" v-for="(song,index) in historyList" :key="song._id+'1'">
-          <Icon
-            title="播放/暂停歌曲"
-            :type="getPlayIconType(song)"
-            class="pointer"
-            @click.self="selectItem(song,index)"
-          />
-
-          <p class="song-name text-left">{{song.name}}</p>
+        <div
+          class="list-tit-right list-tit-item"
+          @click="changeList(2)"
+          :class="{'item-active':listType==2}"
+        >
+          <Icon type="historyList"></Icon>
+          <span>播放历史</span>
         </div>
-      </template>
-      <template v-if="[...playlist].length==0">
-        <img src="../../../assets/img/noSongsDefault.png" />
-        <p>啊哦~~什么都没有T T</p>
-      </template>
-    
+      </div>
+      <div class="list-del text-right pointer" v-if="showBtn()" @click="removeAll()">清空</div>
+      <div class="list-box">
+        <template v-if="[...playlist].length!==0&&listType==1">
+          <div class="playing-songs">
+            <div class="song-box" v-for="(song,index) in playlist" :key="song._id">
+              <Icon
+                title="播放/暂停歌曲"
+                :type="getPlayIconType(song)"
+                class="pointer"
+                @click.self="selectItem(song,index)"
+              />
+
+              <p class="song-name text-left">
+                <router-link :to="{path:'songDetail',query:{id:song._id}}">{{song.name}}</router-link>
+              </p>
+              <Icon type="delete" title="从播放列表删除" @click="delSong(index)" />
+            </div>
+          </div>
+        </template>
+        <template v-if="[...historyList].length!==0&&listType==2">
+          <div class="playing-songs">
+            <div class="song-box" v-for="(song,index) in historyList" :key="song._id+'2'">
+              <Icon
+                title="播放/暂停歌曲"
+                :type="getPlayIconType(song)"
+                class="pointer"
+                @click.self="selectHisIitem(song,index)"
+              />
+
+              <p class="song-name text-left">
+                <router-link :to="{path:'songDetail',query:{id:song._id}}">{{song.name}}</router-link>
+              </p>
+              <Icon type="delete" title="从列表删除" @click="delSongFromHis(song,index)" />
+            </div>
+          </div>
+        </template>
+        <template v-if="[...playlist].length==0&&listType==1">
+          <img src="../../../assets/img/noSongsDefault.png" />
+          <p>啊哦~~什么都没有T T</p>
+        </template>
+        <template v-if="[...historyList].length==0&&listType==2">
+          <img src="../../../assets/img/noSongsDefault.png" />
+          <p>什么都没有听过~~</p>
+        </template>
+      </div>
     </div>
   </div>
 </template>
@@ -60,40 +74,7 @@ export default {
   name: "playList",
   data() {
     return {
-      list: [
-        {
-          name: "温柔故事",
-          src:
-            "http://songtaste.oss-cn-beijing.aliyuncs.com/test1587703788464-%E9%B9%BF%E5%85%88%E6%A3%AE%E4%B9%90%E9%98%9F%20-%20%E6%B8%A9%E6%9F%94%E6%95%85%E4%BA%8B.mp3",
-          _id: "5ea2702d5191f919f4e0296c",
-          album: {
-            _id: "5ea26fbb5191f919f4e0296b",
-            name: "温柔故事",
-            coverImg:
-              "http://songtaste.oss-cn-beijing.aliyuncs.com/test1587703717883-%E6%B8%A9%E6%9F%94%E6%95%85%E4%BA%8B.jpg"
-          },
-          artist: {
-            _id: "5ea16c4b947d6729a056399b",
-            name: "鹿先森乐队"
-          }
-        },
-        {
-          name: "温柔故事2",
-          src:
-            "https://songtaste.oss-cn-beijing.aliyuncs.com/test1587434788162-8801c4c85c4e3c0d16e4450d6e4064eb4a8fd828a0bca20f513944602cd82be20947097d.mp3",
-          _id: "5ea2702d5191f919f4e0297c",
-          album: {
-            _id: "5ea26fbb5191f919f4e0296b",
-            name: "温柔故事",
-            coverImg:
-              "http://songtaste.oss-cn-beijing.aliyuncs.com/test1587703717883-%E6%B8%A9%E6%9F%94%E6%95%85%E4%BA%8B.jpg"
-          },
-          artist: {
-            _id: "5ea16c4b947d6729a056399b",
-            name: "鹿先森乐队"
-          }
-        }
-      ],
+      list: [],
       listType: 1
     };
   },
@@ -108,28 +89,20 @@ export default {
       "historyList"
     ])
   },
-  watch: {
-    collectList: {
-      handler: function(newlist, oldlist) {
-        if (newlist.length <= 0) {
-          return false;
-        }
-        let playList = [...this.playlist];
-        let newList = [...newlist];
-
-        playList.forEach((item, index) => {
-          newList.some((li, number, array) => {
-            if (item._id == li.song._id) {
-              item["like"] = true;
-              return;
-            }
-          });
-        });
-        this.setPlaylist({ list: playList });
-      }
-    }
-  },
+  watch: {},
   methods: {
+    selectHisIitem(song,index){
+      this.setPlaylist({list:this.historyList});
+      this.setCurrentIndex(index);
+      this.setPlaying(true)
+    },
+    delSongFromHis(music) {
+      this.removeHistory(music);
+    },
+    //歌曲详情
+    openSong(id) {
+      this.$router.push({ path: "songDetail", query: { id: id } });
+    },
     showBtn() {
       if (this.listType == 2 && [...this.historyList].length == 0) {
         return false;
@@ -188,27 +161,30 @@ export default {
       "clearPlayList",
       "setIsLike",
       "setPlaylist",
-      "removeHistory",
-      "clearHistory"
+      "clearHistory",
+      "removeHistory"
     ])
   },
   mounted() {
-    this.$nextTick(() => {
-      this.setPlaylist({ list: this.list });
-    });
+    // this.$nextTick(() => {
+    //   this.setPlaylist({ list: this.list });
+    // });
   }
 };
 </script>
 <style lang="scss">
-// .iconfont {
-//   font-family: "iconfont" !important;
-//   font-size: 16px;
-//   font-style: normal;
-//   -webkit-font-smoothing: antialiased;
-//   -moz-osx-font-smoothing: grayscale;
-// }
 @import "scss/index.scss";
+.play-list-box {
+  // position: relative;
+  // width: 440px;
+}
 .play-list {
+  position: absolute;
+  // right: -17px;
+  width: 440px;
+  overflow: hidden;
+  height: 540px;
+  box-sizing: border-box;
   padding: 0 15px;
   .list-tit {
     display: flex;
@@ -227,8 +203,6 @@ export default {
     }
     i {
       font-size: 24px;
-      // line-height: px;
-      // padding: 0 5px;
       transform: translateY(3px);
     }
     font-size: 16px;
@@ -244,9 +218,17 @@ export default {
   }
   .list-box {
     // line-height: 40px;
+    .playing-songs {
+      width: 440px;
+      overflow-x: hidden;
+      overflow-y: scroll;
+      height: 460px;
+    }
     .song-box {
+      width: 457px;
       line-height: 42px;
       display: flex;
+      position: relative;
       // justify-content: space-around;
       i {
         font-size: 26px;
@@ -260,8 +242,21 @@ export default {
       .song-name {
         width: 280px;
         padding: 0 5px;
+        a {
+          &:hover {
+            color: $color-text-actived;
+          }
+        }
       }
       p {
+      }
+      &::after {
+        content: "";
+        width: 90%;
+        position: absolute;
+        height: 1px;
+        background: $color-main;
+        bottom: 0;
       }
     }
   }

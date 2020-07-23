@@ -3,15 +3,19 @@ import {
   setHistoryList,
   removeHistoryList,
   setMode,
-  set_User
+  set_User,
+  clearUserMsg,
+
 } from '@/util/storage'
-import * as types from './mutation-types'
-import * as Music from "api/music"
+
 import {
-  like,
-  offLike,
-  findSongs
-} from "api/colSong"
+  collectSong,
+  nonCollect,
+  collectSinger,
+  nonCollectSinger,
+} from "@/util/request"
+
+import * as types from './mutation-types'
 
 function findIndex(list, music) {
   return list.findIndex(item => {
@@ -19,126 +23,89 @@ function findIndex(list, music) {
   })
 }
 
-//对照播放列表中与收藏表是否有相同歌曲
-function checkColList(colList, playList) {
-  let [collist, playlist] = [colList, playList]
-  if (collist.length <= 0) {
-    return false;
-  }
-  playlist.forEach((item, index) => {
-    collist.some((li, number, array) => {
-      if (item._id == li.song._id) {
-        item["like"] = true;
-        // array.splice(number, 1);
-        return;
-      }
-    });
-  });
-  // console.log(playlist)
-  return playlist
-}
-
-
-
-/**
- * 收藏与取消收藏的数据操作
- * @param {*} param0 
- * @param {*} state like?offlike 
- */
-async function requestLike({
-  userId,
-  songId
-}, state) {
-  let params = {
-    userId: userId,
-    songId: songId
-  }
-  if (state == "like") {
-    return await like(params)
-
-  }
-  if (state == "offLike") {
-    return await offLike(params)
-  }
-}
-
-//setIsLike 是否收藏
-export const setIsLike = function ({
-  commit,
-  state,
-  dispatch
+//设置收藏列表
+export const setCollectList = function ({
+  commit
 }, {
-  userId,
-  songId,
-  operation
+  list
 }) {
-  let result, isLike;
-  switch (operation) {
-    case "like":
-      result = requestLike({
-        userId,
-        songId
-      }, "like");
-      isLike = true;
-      break;
-    case "offLike":
-      result = requestLike({
-        userId,
-        songId
-      }, "offLike");
-      isLike = false;
-      break;
-  }
-  result.then(res => {
-    if (res.code == 200) {
-      let list = [...state.playlist];
-      // console.log(list)
-      let collist = [...state.collectList]
-      let colListSongs = collist.map(item => {
-        return item.song
-      })
-
-      switch (operation) {
-        case "like":
-          let obj = {
-            song: {},
-            users: []
-          };
-          obj.users.push({
-            _id: state.user.id,
-            name: state.user.name
-          });
-          obj.song["_id"] = songId
-          collist.push(obj);
-          break;
-        case "offLike":
-          let colIndex = findIndex(colListSongs, {
-            _id: songId
-          });
-          if (colIndex > -1) {
-            collist.splice(colIndex, 1)
-
-          };
-          break;
-
-      }
-      commit(types.SET_COLLECTLIST, collist)
-
-    
-      let index = findIndex(list, {
-        _id: songId
-      })
-
-      if (index > -1) {
-        list[index]['like'] = isLike;
-
-        // dispatch("setPlaylist",{list})
-        commit(types.SET_PLAYLIST, list)
-        commit(types.SET_ORDERLIST, list)
-      }
-    }
-  })
+  commit(types.SET_COLLECTLIST, list)
 }
+//设置歌手关注列表
+export const setCollectSingerList = function ({
+  commit
+}, {
+  list
+}) {
+  commit(types.SET_COLLECTSINGERS, list)
+}
+
+//收藏歌曲
+export const setCollect = async function ({
+  commit,
+  state
+}, {
+  music
+}) {
+  let list = [...state.collectList],
+    user = JSON.parse(JSON.stringify(state.user));
+
+  let newList = await collectSong(music, {
+    list: list,
+    user: user
+  });
+  commit(types.SET_COLLECTLIST, newList)
+}
+//取消收藏
+export const setNonCollect = async function ({
+  commit,
+  state
+}, {
+  music
+}) {
+  let list = [...state.collectList],
+    user = JSON.parse(JSON.stringify(state.user))
+  let newList = await nonCollect(music, {
+    list: list,
+    user: user
+  })
+  commit(types.SET_COLLECTLIST, newList)
+}
+//取消关注歌手
+export const setNonCollectSinger = async function ({
+  commit,
+  state
+}, {
+  singer
+}) {
+  let list = [...state.collectSingers],
+    user = JSON.parse(JSON.stringify(state.user))
+    
+  let newList = await nonCollectSinger(singer, {
+    list: list,
+    user: user
+  })
+  commit(types.SET_COLLECTSINGERS, newList)
+}
+//关注歌手
+export const setCollectSinger = async function ({
+  commit,
+  state
+}, {
+  singer
+}) {
+  let list = [...state.collectSingers],
+    user = JSON.parse(JSON.stringify(state.user));
+
+  let newList = await collectSinger(singer, {
+    list: list,
+    user: user
+  });
+  commit(types.SET_COLLECTSINGERS, newList)
+}
+
+
+
 
 // 设置播放列表
 export const setPlaylist = function ({
@@ -148,18 +115,8 @@ export const setPlaylist = function ({
 }, {
   list
 }) {
-  let listCheck = checkColList(getters.collectList, list)
-  // console.log(listCheck)
-  if (listCheck) {
-    commit(types.SET_PLAYLIST, listCheck)
-    commit(types.SET_ORDERLIST, listCheck)
-  } else {
-    commit(types.SET_PLAYLIST, list)
-    commit(types.SET_ORDERLIST, list)
-  }
-
-
-
+  commit(types.SET_PLAYLIST, list)
+  commit(types.SET_ORDERLIST, list)
 }
 
 // 选择播放（会更新整个播放列表）
@@ -204,6 +161,13 @@ export const clearPlayList = function ({
   commit(types.SET_ORDERLIST, [])
 }
 
+//退出登录
+export const clearUser = function ({
+  commit
+}) {
+  commit(types.SET_USER, clearUserMsg())
+}
+
 // 删除正在播放列表中的歌曲
 export const removePlayListItem = function ({
   commit,
@@ -233,8 +197,9 @@ export const setHistory = function ({
 }
 // 删除播放历史
 export const removeHistory = function ({
-  commit
+  commit,state
 }, music) {
+  // let list=[...state.historyList]
   commit(types.SET_HISTORYLIST, removeHistoryList(music))
 }
 // 清空播放历史

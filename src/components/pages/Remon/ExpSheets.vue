@@ -10,7 +10,7 @@
         <div class="hot-cont" v-for="item in list" :key="item._id">
           <!-- <div class="hot-cont" v-for="item in hotSongs" :key="item.id"> -->
           <div class="hot-cont-img">
-            <el-image :src="item.coverImg" title="歌单详情" lazy @click="openSheet(item._id)"></el-image>
+            <el-image :src="item.coverImg" title="歌单详情" lazy @click="openSheet(item._id,item)"></el-image>
           </div>
 
           <div class="hot-cont-msg text-left">
@@ -19,12 +19,12 @@
                 <i class="el-icon-video-play" @click="playSheet(item._id)" title="播放"></i>
               </p>
               <p class="icon-pra">
-                <Icon type="bofangliang" title="播放次数"></Icon>
-                <span>10</span>
+                <Icon type="clickSum" title="点击量"></Icon>
+                <span>{{item.popularity}}</span>
               </p>
               <p class="icon-pra">
                 <Icon type="music" title="总歌曲数"></Icon>
-                <span>10</span>
+                <span>{{item.songs.length}}</span>
               </p>
             </div>
             <p class="sheet-name">{{item.name}}</p>
@@ -52,7 +52,9 @@ export default {
         }
       });
     },
-    openSheet(id) {
+    openSheet(id,sheet) {
+      sheet.popularity+=1;
+       SongSheet.popularity({id:id}).then()
       this.$router.push({ path: "songlist", query: { id: id } });
     },
     async playSheet(id) {

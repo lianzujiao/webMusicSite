@@ -6,6 +6,27 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "13939717",
+      "name": "加号",
+      "font_class": "hao",
+      "unicode": "e601",
+      "unicode_decimal": 58881
+    },
+    {
+      "icon_id": "4155319",
+      "name": "点击量",
+      "font_class": "clickSum",
+      "unicode": "e61d",
+      "unicode_decimal": 58909
+    },
+    {
+      "icon_id": "8759714",
+      "name": "播放",
+      "font_class": "bofang",
+      "unicode": "e674",
+      "unicode_decimal": 58996
+    },
+    {
       "icon_id": "8224464",
       "name": "音乐",
       "font_class": "music",

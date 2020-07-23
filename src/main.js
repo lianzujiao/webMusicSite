@@ -9,9 +9,12 @@ import 'element-ui/lib/theme-chalk/index.css'
 import "./assets/icon/iconfont.css"
 import Icon from "./baseComponets/Icon.vue";
 import  LazyImg from "./baseComponets/LazyImg.vue";
+import {formatDate} from "./util/filter"
 Vue.config.productionTip = false
 Vue.use(ElementUI)
 
+//时间过滤器
+Vue.filter('formatDate',formatDate)
 
 // icon 组件
 Vue.component(Icon.name, Icon)

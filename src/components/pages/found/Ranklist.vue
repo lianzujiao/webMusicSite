@@ -27,7 +27,10 @@
       <div class="rank-box-content">
         <div class="rank-box" v-for="(item,index) in list" v-if="index>0&&index!=1">
           <div class="rank-box-img">
-            <img :src="item.album.coverImg" @click="openSongdea(item._id)" alt />
+            <img v-if="item.album.coverImg" :src="item.album.coverImg" alt />
+            <span>
+              <Icon type="bofang" @click="selectOne(item)"></Icon>
+            </span>
           </div>
           <div class="rank-box-msg">
             <div class="msg-top">
@@ -37,10 +40,11 @@
                   class="song-name"
                   :to="{path:'songDetail',query:{id:item._id}}"
                 >{{item.name}}</router-link>
+
                 <Icon type="bofangliang" />
                 <span>{{item.popularity}}</span>
-                <div class="msg-artist">
-                  <router-link to>{{item.artist.name}}</router-link>
+                <div class="msg-artist" v-if="item.artist">
+                  <router-link :to="{path:'singer',query:{id:item.artist._id}}">{{item.artist.name}}</router-link>
                 </div>
               </div>
             </div>
@@ -75,6 +79,10 @@ export default {
         }
       });
     },
+    selectOne(music) {
+      this.selectAddPlay(music);
+    },
+
     openSongDea(id) {
       this.$router.push({ path: "songDetail", query: { id: id } });
     },
@@ -82,12 +90,17 @@ export default {
       setPlaying: "SET_PLAYING",
       setCurrentIndex: "SET_CURRENTINDEX"
     }),
-    ...mapActions(["setPlaylist"])
+    ...mapActions(["setPlaylist", "selectAddPlay"])
   },
-  mounted() {
-    this.getList();
-  },
-  watch: {}
+  watch: {
+    $route: {
+      handler: function(newVal, old) {
+        this.getList();
+      },
+      immediate: true,
+      deep: true
+    }
+  }
 };
 </script>
 <style lang="scss">
@@ -105,7 +118,7 @@ export default {
       display: flex;
       box-sizing: border-box;
       width: 1100px;
-      padding: 0px 20px;
+      padding: 20px 20px 0;
       margin: 0 auto;
       justify-content: space-between;
       // padding-top: 90px;
@@ -142,6 +155,9 @@ export default {
             display: block;
             font-size: 26px;
             line-height: 45px;
+            &:hover {
+              color: $color-text-actived;
+            }
           }
           .top-popu {
             display: flex;
@@ -167,6 +183,9 @@ export default {
           a {
             font-size: 18px;
             line-height: 45px;
+            &:hover {
+              color: $color-text-actived;
+            }
           }
         }
         .top-btn {
@@ -206,17 +225,38 @@ export default {
     justify-content: flex-start;
     flex-wrap: wrap;
     .rank-box {
-      width: 250px;
-      padding: 10px 33px 20px 0px;
-      &:nth-child(4n) {
+      width: 180px;
+      padding: 10px 35px 20px 0px;
+      &:nth-child(5n) {
         padding-right: 0px;
       }
       .rank-box-img {
+        position: relative;
         border: 1px solid $color-main;
+        padding: 5px;
         img {
-          width: 250px;
-          height: 255px;
-          cursor: pointer;
+          width: 170px;
+          height: 170px;
+          border: 1px solid $color-main;
+          width: 166px;
+          height: 168px;
+        }
+        span {
+          display: none;
+          position: absolute;
+          top: 45%;
+          left: 42%;
+          background: $color-text-actived;
+          border-radius: 50%;
+          i {
+            font-size: 25px;
+            color: white;
+          }
+        }
+        &:hover {
+          span {
+            display: block;
+          }
         }
       }
       .rank-box-msg {
@@ -228,18 +268,23 @@ export default {
             font-size: 32px;
             width: 35px;
             padding-top: 10px;
+            margin-right: 8px;
           }
           .msg-top-name {
             width: 215px;
             padding-top: 10px;
             .song-name {
-              display: inline-block;
-              width: 180px;
+              font-size: 16px;
+              display: block;
+              width: 155px;
               overflow: hidden;
               text-overflow: ellipsis;
               white-space: nowrap;
+              &:hover {
+                color: $color-text-actived;
+              }
             }
-            a,
+
             span {
               font-size: 18px;
             }
@@ -259,6 +304,9 @@ export default {
                 // margin-left: 15px;
                 font-size: 14px;
                 color: #999;
+                &:hover {
+                  color: $color-text-actived;
+                }
               }
             }
           }

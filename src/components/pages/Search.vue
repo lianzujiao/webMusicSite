@@ -22,18 +22,23 @@
         </div>
         <div class="songs-content" v-show="btnIndex==0">
           <p v-if="songListCopy.length==0">暂无相关歌曲</p>
-          <div class="song-cont-box" v-for="(song,index) in songListCopy" :key="index">
-            <div class="song-cont-box-img">
-              <img :src="song.album.coverImg" />
+          <div class="end-song-box" v-for="(item,index) in songListCopy" :key="index">
+            <div class="end-song-img">
+              <img :src="item.album.coverImg" />
             </div>
-            <div class="song-cont-box-msg">
-              <p class="song-msg-name" v-html="song.name"></p>
-              <p class="song-msg-artist">{{song.artist.name}}</p>
+            <div class="end-song-name">
+              <div class="end-song-name-item">
+                <router-link :to="{path:'songDetail',query:{id:item._id}}" v-html="item.name"></router-link>
+              </div>
+              <div class="end-song-name-item">
+                <router-link :to="{path:'singer',query:{id:item.artist._id}}">{{item.artist.name}}</router-link>
+              </div>
             </div>
-            <div class="song-cont-box-play">
-              <i class="el-icon-video-play"></i>
+            <div class="end-song-play">
+              <Icon type="bofang" @click="playSong(item)" />
             </div>
           </div>
+          <p v-if="songList.length<songTotal" class="load-more" @click="loadMoreSongs">加载更多</p>
         </div>
         <div class="sheets-content" v-show="btnIndex==1">
           <p v-if="sheetList.length==0">暂无相关歌单</p>
@@ -42,8 +47,35 @@
               <img :src="sheet.coverImg" alt />
             </div>
             <div class="sheet-box-msg">
-              <p class="sheet-msg-name" v-html="sheet.name"></p>
-              <p class="sheet-msg-desc">{{sheet.desc}}</p>
+              <p class="sheet-msg-name" v-html="sheet.name" @click="openSheet(sheet._id)"></p>
+              <div class="hot-cont-span">
+                <p class="icon-pra">
+                  <i class="el-icon-video-play" @click="playSheet(sheet)" title="播放"></i>
+                </p>
+                <p class="icon-pra">
+                  <Icon type="clickSum" title="点击量"></Icon>
+                  <span>{{sheet.popularity}}</span>
+                </p>
+                <p class="icon-pra">
+                  <Icon type="music" title="总歌曲数"></Icon>
+                  <span>{{sheet.songs.length}}</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="singer-content" v-show="btnIndex==2">
+          <p v-if="singerList.length==0">暂无相关歌手</p>
+          <div class="band-tags-main">
+            <div class="band-tags-box text-left" v-for="(band,index) in singerListCopy" :key="index">
+              <div class="band-tags-imgs">
+                <img :src="band.coverImg" alt />
+              </div>
+              <div class="band-msg">
+                <router-link :to="{path:'singer',query:{id:band._id}}" v-html="band.name"></router-link>
+                <p>专辑数量:{{band.albums.length}}</p>
+                <p>简介:{{band.desc}}</p>
+              </div>
             </div>
           </div>
         </div>
@@ -54,36 +86,43 @@
 <script>
 import * as Music from "api/music";
 import * as SongSheet from "api/SongSheet";
+import * as Singer from "api/singer";
+import { mapActions } from "vuex";
+
+import { deepCopy } from "@/util/util";
 export default {
   data() {
     return {
-      btns: [{ name: "歌曲" }, { name: "歌单" }],
+      btns: [{ name: "歌曲" }, { name: "歌单" }, { name: "歌手" }],
       btnIndex: 0,
       key: "", //搜索关键字
       songList: [],
       songTotal: 0,
       sheetList: [],
-      checkKey: "" //用于保证高亮关键字在请求发生后才确定
+      checkKey: "", //用于保证高亮关键字在请求发生后才确定
+      pageSize: 10,
+      pageNumber: 1,
+      singerList: []
     };
   },
   computed: {
     songListCopy: {
       get: function() {
-        let songList = this.songList;
+        let songList = deepCopy(this.songList);
         let keyword = this.checkKey;
         let replaceReg = new RegExp(keyword, "i");
         let replaceWord = `<span class="highlight-text">${keyword}<span>`;
 
-        let list = Array.from(songList).map(function(item) {
+        let list = songList.map(function(item) {
           item.name = item.name.replace(replaceReg, replaceWord);
           return item;
         });
         return list;
       }
     },
-     sheetListCopy: {
+    sheetListCopy: {
       get: function() {
-        let sheetList = this.sheetList;
+        let sheetList = deepCopy(this.sheetList);
         let keyword = this.checkKey;
         let replaceReg = new RegExp(keyword, "i");
         let replaceWord = `<span class="highlight-text">${keyword}<span>`;
@@ -94,9 +133,46 @@ export default {
         });
         return list;
       }
+    },
+    singerListCopy: {
+      get: function() {
+        let singerList = deepCopy(this.singerList);
+        let keyword = this.checkKey;
+        let replaceReg = new RegExp(keyword, "i");
+        let replaceWord = `<span class="highlight-text">${keyword}<span>`;
+
+        let list = singerList.map(function(item) {
+          item.name = item.name.replace(replaceReg, replaceWord);
+          return item;
+        });
+        return list;
+      }
     }
   },
   methods: {
+    playSheet(sheet) {
+      SongSheet.getById({ id: sheet._id }).then(res => {
+        if (res.code == 200) {
+          // console.log(res.data)
+          let list = res.data.songs;
+          this.selectPlay({ list: list, index: 0 });
+        }
+      });
+    },
+    openSheet(id) {
+      this.$router.push({ path: "/songlist", query: { id: id } });
+    },
+    ...mapActions(["selectAddPlay", "selectPlay"]),
+    playSong(music) {
+      let song = this.songList.find(item => {
+        return item._id == music._id;
+      });
+      this.selectAddPlay(song);
+    },
+    loadMoreSongs() {
+      this.pageNumber += 1;
+      this.getMusic();
+    },
     changeSearch(index) {
       this.btnIndex = index;
       this.search();
@@ -109,6 +185,9 @@ export default {
         case 1:
           this.getSheets();
           break;
+        case 2:
+          this.getSinger();
+          break;
       }
     },
     getSheets() {
@@ -120,28 +199,41 @@ export default {
       });
     },
     getMusic() {
-      Music.getByName({ name: this.key, pageSize: 2, pageNumber: 1 }).then(
-        res => {
-          this.checkKey = this.key;
-          if (res.code == 200) {
+      Music.getByName({
+        name: this.key,
+        pageSize: this.pageSize,
+        pageNumber: this.pageNumber
+      }).then(res => {
+        this.checkKey = this.key;
+        if (res.code == 200) {
+          if (this.pageNumber == 1) {
             this.songList = res.data;
-            this.songTotal = res.total;
+          } else {
+            this.songList = this.songList.concat(res.data);
           }
+          this.songTotal = res.total;
         }
-      );
+      });
+    },
+    getSinger() {
+      Singer.getByName({ name: this.key }).then(res => {
+        if (res.code == 200) {
+          this.singerList = res.data;
+        }
+      });
     }
   },
   mounted() {
     this.key = this.$route.query.key;
     this.getMusic();
   },
-  watch:{
-    $route:{
-      handler:function(newRoute,old){
-        if(newRoute){
-          this.key=newRoute.query.key;
-          this.btnIndex=0;
-          this.search()
+  watch: {
+    $route: {
+      handler: function(newRoute, old) {
+        if (newRoute) {
+          this.key = newRoute.query.key;
+          this.btnIndex = 0;
+          this.search();
         }
       }
     }
@@ -159,7 +251,7 @@ export default {
     width: 220px;
     background: white;
     margin-left: 30px;
-    height: 140px;
+    height: 210px;
     .active-btn {
       background: url("../../assets/img/e424322629ebb459adaa8a8d5bcc5965.png")
         no-repeat;
@@ -173,7 +265,7 @@ export default {
       height: 70px;
       color: $color-span;
       font-size: 18px;
-      &:nth-child(1) {
+      &:nth-child(n) {
         border-bottom: 1px solid $color-main;
       }
     }
@@ -212,46 +304,85 @@ export default {
     .songs-content {
       padding: 30px 45px;
       min-height: 600px;
-      .song-cont-box {
+      .end-song-box {
         display: flex;
-        margin-bottom: 15px;
-        .song-cont-box-img {
+        padding: 8px 0 8px 0;
+        border-bottom: 1px solid #ebebeb;
+        .end-song-index {
+          width: 60px;
+          font-size: 16px;
+          line-height: 65px;
+        }
+        .end-song-img {
+          width: 80px;
           img {
-            width: 100px;
-            height: 100px;
-            cursor: pointer;
+            width: 65px;
+            border-radius: 8px;
           }
         }
-        .song-cont-box-msg {
-          padding: 10px 15px;
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
+        .no-index-img {
+          margin-left: 60px;
+        }
+        .end-song-name {
+          padding: 8px 0 8px 25px;
+          width: 300px;
           text-align: left;
-          width: 500px;
-          .song-msg-name {
-            font-size: 18px;
-            cursor: pointer;
-            span {
-              font-size: 18px;
+          .highlight-text {
+            color: $color-text-actived;
+          }
+          .end-song-name-item {
+            a {
+              font-size: 16px;
+              line-height: 25px;
             }
-            .highlight-text {
+
+            a:hover {
               color: $color-text-actived;
             }
           }
-          .song-msg-artist {
-            margin-bottom: 0;
-            cursor: pointer;
+          .end-song-name-item:nth-child(2) {
+            a {
+              font-size: 14px;
+            }
           }
         }
-        .song-cont-box-play {
-          margin-right: 0px;
+
+        .end-song-popular {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          padding: 0 25px;
           i {
-            font-size: 40px;
-            line-height: 100px;
-            cursor: pointer;
+            font-size: 23px;
+            color: #d4d4d4;
+          }
+          span {
+            font-size: 16px;
           }
         }
+        .end-song-play {
+          padding: 16px 25px;
+          display: none;
+          i {
+            font-size: 24px;
+            // line-height: 68px;
+            color: #b3b3b3;
+          }
+          i:hover {
+            color: $color-text-actived;
+          }
+        }
+        &:hover {
+          background: #ebebeb47;
+          .end-song-play {
+            display: block;
+          }
+        }
+      }
+      .load-more {
+        margin: 10px;
+        color: $color-text-actived;
+        cursor: pointer;
       }
     }
     .sheets-content {
@@ -260,6 +391,8 @@ export default {
       .sheet-cont-box {
         display: flex;
         margin-bottom: 20px;
+        border-bottom: 1px solid $color-main;
+        padding-bottom: 20px;
         .sheet-box-img {
           width: 150px;
           height: 150px;
@@ -278,10 +411,81 @@ export default {
           }
           .sheet-msg-name {
             margin-bottom: 15px;
-            font-size: 18px;
-             .highlight-text {
+            font-size: 16px;
+            span {
+              font-size: inherit;
+              &:hover {
+                color: $color-text-actived;
+              }
+            }
+            .highlight-text {
               color: $color-text-actived;
             }
+            &:hover {
+              color: $color-text-actived;
+            }
+          }
+          .hot-cont-span {
+            display: flex;
+            justify-content: space-between;
+            width: 30%;
+            .icon-pra {
+              i {
+                font-size: 23px;
+                color: $color-text-actived;
+                cursor: default;
+              }
+              .el-icon-video-play {
+                cursor: pointer;
+              }
+              span {
+                font-size: 16px;
+              }
+            }
+          }
+        }
+      }
+    }
+    .singer-content {
+      .band-tags-main {
+        margin: 15px 0 30px 0;
+        .band-tags-box {
+          padding: 15px 30px;
+          display: flex;
+          border-bottom: 1px solid $color-main;
+          .band-tags-imgs {
+            width: 150px;
+            padding: 8px 8px 6px 8px;
+            box-shadow: 0 0 4px rgba($color: #000000, $alpha: 0.3);
+            img {
+              width: 150px;
+              height: 150px;
+            }
+          }
+          .band-msg {
+            font-size: 16px;
+            padding: 10px 20px;
+            a {
+              font-size: inherit;
+             
+              span{
+                font-size: inherit;
+                 &:hover {
+                color: $color-text-actived;
+              }
+              }
+              .highlight-text{
+                color: $color-text-actived;
+              }
+            }
+            p{
+              margin-top: 15px;
+              &:nth-of-type(2){
+                height: 77px;
+                overflow: hidden;
+              }
+            }
+            
           }
         }
       }

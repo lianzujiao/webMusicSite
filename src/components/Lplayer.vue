@@ -23,6 +23,7 @@
         <template v-if="currentMusic&&currentMusic._id">
           <span>{{currentMusic.name}}</span>
           <span>{{currentMusic.artist.name}}</span>
+          <span class="progress-load" v-show="currentProgress==0||percentMusic==0">[ loading ]</span>
         </template>
         <template v-else>
           <span>SongTaste</span>
@@ -52,7 +53,7 @@
         />
       </div>
       <div class="right-collect" :class="{disable:!currentMusic._id}">
-        <Icon type="like" class="pointer" @click="collectSong()" title="收藏歌曲" />
+        <Icon :type="getLikeIconType" class="pointer" @click="collectSong()" title="收藏歌曲" />
       </div>
       <div class="right-del" :class="{disable:!currentMusic._id}">
         <Icon type="delete" class="pointer" @click="delSong()" title="从播放列表移除" />
@@ -77,9 +78,9 @@
   </div>
 </template>
 <script>
-import {findSongs} from "api/colSong"
-import {popularity} from "api/music"
-
+import { like, offLike, findSongs } from "api/colSong";
+import * as ColSinger from "api/colSinger";
+import { popularity } from "api/music";
 import mmPlayer from "./pages/player/mmPlayer";
 import playList from "./pages/player/PlayList";
 import progress from "@/baseComponets/Progress";
@@ -103,7 +104,7 @@ export default {
     "v-volume": volume
   },
   filters: {
-    // 时间格式化
+    // 歌曲时长格式化
     format
   },
   data() {
@@ -118,7 +119,6 @@ export default {
       isMute: false, // 是否静音
       foldList: false,
       volume // 音量大小
-      // songImg: "",
     };
   },
   computed: {
@@ -127,6 +127,21 @@ export default {
       return this.currentMusic._id && this.currentMusic.album.coverImg
         ? this.currentMusic.album.coverImg
         : defaultBG;
+    },
+    //设置收藏图标
+    getLikeIconType() {
+      if (!this.user.email) {
+        return "like";
+      }
+      let index;
+      if (typeof this.collectList != "undefined") {
+        index = this.FindIndex(this.collectList, this.currentMusic);
+      }
+      if (typeof this.collectList == "undefined" || index < 0) {
+        return "like";
+      } else {
+        return "offLike";
+      }
     },
     percentMusic() {
       const duration = this.currentMusic.duration;
@@ -141,7 +156,9 @@ export default {
       "currentIndex",
       "currentMusic",
       "historyList",
-      "user"
+      "user",
+      "collectList",
+      "collectSingers",
     ])
   },
   watch: {
@@ -151,23 +168,23 @@ export default {
         this.currentMusic.duration = oldMusic.duration;
       }
       if (!newMusic) {
-        // this.lyric = [];
         return;
       }
       //不是新的列表但前后两首歌相同
       if (newMusic._id === oldMusic._id) {
         return;
       }
+      // this.setHistory(newMusic);
 
       this.audioEle.src = newMusic.src;
       //切换歌曲后重新加载audio元素，确定duration
       this.audioEle.load();
-     
+
       //重置当前时间和当前进度
       this.currentTime = this.currentProgress = 0;
       // console.log(123);
       silencePromise(this.audioEle.play());
-       this.sendPopular(newMusic._id)
+      this.sendPopular(newMusic._id);
     },
     //播放状态
     playing(newPlaying) {
@@ -196,19 +213,66 @@ export default {
       mmPlayer.initAudio(this);
       this.initKeyDown();
       this.volumeChange(this.volume);
-      // this.getColSongs();
+      this.getCollectSinger();
     });
   },
   methods: {
+     //获取所有收藏的歌手
+    getCollectSinger() {
+      ColSinger.findSingers({ userId: this.user.id }).then(res => {
+        if (res.code == 200) {
+          this.setCollectSingerList({ list: res.data });
+        }
+      });
+    },
+    FindIndex(list, ele) {
+      return list.findIndex(item => {
+        return item._id == ele._id;
+      });
+    },
+    //收藏和取消收藏歌曲
+    collectSong() {
+      if (!this.user.email) {
+        this.$message("当前未登录~");
+        return;
+      }
+      let index;
+      if (typeof this.collectList != "undefined") {
+        index = this.FindIndex(this.collectList, this.currentMusic);
+      }
+      if (typeof this.collectList == "undefined" || index < 0) {
+        this.setCollect({ music: this.currentMusic });
+        this.$message({
+          type: "success",
+          message: "收藏成功"
+        });
+      } else {
+        this.setNonCollect({ music: this.currentMusic });
+        this.$message({
+          type: "success",
+          message: "已取消收藏"
+        });
+      }
+    },
+
+    //删除事件
+    delSong() {
+      let list = [...this.playlist];
+      let index = list.findIndex(item => {
+        return (item._id = this.currentMusic._id);
+      });
+      list.splice(index, 1);
+      this.removePlayListItem({ list, index });
+    },
 
     //每首歌播放一次添加一个播放量
-    sendPopular(id){
-      popularity({id:id}).then(res=>{
-        if(res.code==200){
+    sendPopular(id) {
+      popularity({ id: id }).then(res => {
+        if (res.code == 200) {
         }
-      })
+      });
     },
-   
+
     //播放列表的某一首歌
     selectItem(song, index) {
       if (this.currentMusic._id && song._id == this.currentMusic._id) {
@@ -370,10 +434,18 @@ export default {
     ...mapMutations({
       setPlaying: "SET_PLAYING",
       setPlayList: "SET_PLAYLIST",
-      setCurrentIndex: "SET_CURRENTINDEX",
-      setCollectList:"SET_COLLECTLIST"
+      setCurrentIndex: "SET_CURRENTINDEX"
     }),
-    ...mapActions(["setHistory", "setPlayMode", "getSongDetail"])
+    ...mapActions([
+      "setHistory",
+      "setPlayMode",
+      "getSongDetail",
+      "setCollectList",
+      "removePlayListItem",
+      "setCollect",
+      "setNonCollect",
+      "setCollectSingerList"
+    ])
   }
 };
 </script>
@@ -443,6 +515,12 @@ export default {
       padding: 15px 0 0 0;
       span {
         font-size: 15px;
+      }
+      .progress-load {
+        width: 20px;
+        height: 20px;
+        font-size: 12px;
+        color: #6ed56bd4;
       }
       .song-progress {
         display: flex;

@@ -8,7 +8,6 @@
         v-for="item in list"
         :key="item._id"
       >
-        <!-- <div class="hot-cont" v-for="item in hotSongs" :key="item.id"> -->
         <div class="hot-cont-img">
           <el-image :src="item.coverImg" lazy />
           <div class="hot-cont-span">
@@ -16,7 +15,6 @@
           </div>
         </div>
         <p>{{item.name}}</p>
-        <!-- </div> -->
       </router-link>
     </div>
   </div>

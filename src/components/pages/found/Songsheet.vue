@@ -13,15 +13,16 @@
         <div class="sheet-right-tags">
           <div
             class="sheet-right-tag"
-            @click="selectAll(item,index)"
+            @click="selectNew(item,index)"
             v-for="(item,index) in ['全部','最新']"
+            :class="{'tag-active':activeIndex==index}"
           >{{item}}</div>
         </div>
         <div class="sheet-right-content">
           <div class="hot-cont" v-for="item in list" :key="item._id">
             <!-- <div class="hot-cont" v-for="item in hotSongs" :key="item.id"> -->
             <div class="hot-cont-img">
-              <el-image :src="item.coverImg" title="歌单详情" lazy @click="openSheet(item._id)"></el-image>
+              <el-image :src="item.coverImg" title="歌单详情" lazy @click="openSheet(item._id,item)"></el-image>
             </div>
 
             <div class="hot-cont-msg text-left">
@@ -30,29 +31,31 @@
                   <i class="el-icon-video-play" @click="playSheet(item._id)" title="播放"></i>
                 </p>
                 <p class="icon-pra">
-                  <Icon type="bofangliang" title="播放次数"></Icon>
-                  <span>10</span>
+                  <Icon type="clickSum" title="播放次数"></Icon>
+                  <span>{{item.popularity}}</span>
                 </p>
                 <p class="icon-pra">
                   <Icon type="music" title="总歌曲数"></Icon>
-                  <span>10</span>
+                  <span>{{item.songs.length}}</span>
                 </p>
               </div>
-              <p class="sheet-name">{{item.name}}</p>
+              <p class="sheet-name" @click="openSheet(item._id,item)" >{{item.name}}</p>
             </div>
           </div>
         </div>
+        <div class="sheet-load" @click="loadMore()" v-show="isMore">加载更多</div>
       </div>
     </div>
   </div>
 </template>
 <script>
 import * as SongSheet from "api/SongSheet";
+
 export default {
   data() {
     return {
       list: [],
-      songs: [],
+
       tags: [
         { name: "民谣", active: false },
         { name: "摇滚", active: false },
@@ -60,50 +63,78 @@ export default {
         { name: "流行", active: false },
         { name: "节日", active: false },
         { name: "风格", active: false },
-        { name: "心情", active: false },
-        { name: "舞曲", active: false }
+        { name: "心情", active: false }
       ],
-      pageSize: 8,
+      total: 0,
+      pageSize: 9,
       pageNumber: 1,
       selectTags: [], //数组为空时表示搜索全部
-      range: "new"
+      range: "all",
+      isMore: true,
+      activeIndex:0,
     };
   },
+  computed: {
+    // songs:function(){
+    //   this.list.slice(0,this.pageSize)
+    // }
+  },
   watch: {
-    selectTag: {
+    selectTags: {
       handler: function(newValue, oldValue) {
-        console.log(newValue);
+        this.pageNumber = 1;
+        this.getSheets();
       },
       deep: true
     }
   },
   methods: {
+    openSheet(id, item) {
+      item.popularity += 1;
+      SongSheet.popularity({ id: id }).then();
+      this.$router.push({ path: "songlist", query: { id: id } });
+    },
+    loadMore() {
+      this.pageNumber += 1;
+      this.getSheets();
+    },
     //选择tags
+
     selectTag(tag) {
       tag.active = !tag.active;
       if (tag.active) {
-        // this.selectTags.push(tag.name);
         this.$set(this.selectTags, this.selectTags.length, tag.name);
       } else {
         let index = Array.from(this.selectTags).findIndex((item, index) => {
           return item == tag.name;
         });
-        if (index > 0) {
-          // this.selectTags.splice(index, 1);
-          this.$delete(this.selectTags, this.selectTags.length, tag.name);
+        if (index >= 0) {
+          this.$delete(this.selectTags, index);
         }
       }
     },
-    selectNew(item, index) {},
+    selectNew(item, index) {
+      this.range = index == 0 && item == "全部" ? "all" : "new";
+      this.pageNumber = 1;
+      this.getSheets();
+      this.activeIndex=index
+    },
     getSheets() {
       SongSheet.getByTag({
         pageSize: this.pageSize,
         pageNumber: this.pageNumber,
-        tags: this.selectTags,
+        tags: Array.from(this.selectTags),
         range: this.range
       }).then(res => {
         if (res.code == 200) {
-          this.list = res.data;
+          this.total = res.data.total;
+
+          if (this.pageNumber == 1) {
+            this.list = res.data.sheets;
+          } else {
+            this.list = this.list.concat(res.data.sheets);
+          }
+          this.isMore = this.list.length >= this.total ? false : true;
         }
       });
     }
@@ -153,6 +184,9 @@ export default {
         display: flex;
         justify-content: flex-end;
         margin-bottom: 15px;
+        .tag-active{
+          color: $color-text-actived;
+        }
         .sheet-right-tag {
           width: 50px;
           cursor: pointer;
@@ -199,20 +233,31 @@ export default {
               }
             }
             width: 240px;
-            height: 45px;
+            height: 65px;
             background: #f1f1f1;
             overflow: hidden;
             .sheet-name {
               width: 240px;
-              line-height: 31px;
-              height: 30px;
-              text-overflow: ellipsis;
+              line-height: 23px;
+              padding: 2px 5px 0 5px;
+              box-sizing: border-box;
               overflow: hidden;
-              white-space: nowrap;
+              text-overflow: ellipsis;
+              display: -webkit-box;
+              -webkit-line-clamp: 2;
+              -webkit-box-orient: vertical;
+              cursor: pointer;
+              &:hover{
+                color:$color-text-actived;
+              }
             }
           }
         }
       }
+    }
+    .sheet-load {
+      cursor: pointer;
+      color: $color-text-actived;
     }
   }
 }

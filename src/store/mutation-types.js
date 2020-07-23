@@ -8,4 +8,5 @@ export const SET_HISTORYLIST = 'SET_HISTORYLIST' // 修改播放历史列表
 export const SET_USER='SET_USER'//修改当前登录用户
 export const SET_ISlOGIN='SET_ISlOGIN'//判断当前用户是否已经登录
 export const SET_COLLECTLIST='SET_COLLECTLIST'//修改收藏列表
+export const SET_COLLECTSINGERS='SET_COLLECTSINGERS'//修改收藏列表
 

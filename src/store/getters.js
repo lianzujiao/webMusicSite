@@ -18,6 +18,10 @@ export const currentMusic = state => {
 export const collectList=state=>{
   return state.collectList;
 }
+//收藏列表
+export const collectSingers=state=>{
+  return state.collectSingers;
+}
 // 播放历史列表
 export const historyList = state => state.historyList
 

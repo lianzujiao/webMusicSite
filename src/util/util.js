@@ -29,7 +29,7 @@ export const randomSortArray = function shuffle(array) {
 // 防抖函数
 export function debounce(func, delay) {
   let timer
-  return function(...args) {
+  return function (...args) {
     if (timer) {
       clearTimeout(timer)
     }
@@ -39,34 +39,28 @@ export function debounce(func, delay) {
   }
 }
 
+//深拷贝函数
+export function deepCopy(obj){
+  var copyObj= obj instanceof Array?[]:{};
+  for(var prop in obj){
+      if(typeof obj[prop]==="object"){
+          copyObj[prop]=deepCopy(obj[prop])//递归实现深拷贝
+      }else{
+          copyObj[prop]=obj[prop]
+      }
+  };
+  return copyObj;
+
+}
+
 // 补0函数
 export function addZero(s) {
   return s < 10 ? '0' + s : s
 }
 
-// 歌词解析
-const timeExp = /\[(\d{2,}):(\d{2})(?:\.(\d{2,3}))?]/g
-export function parseLyric(lrc) {
-  const lines = lrc.split('\n')
-  const lyric = []
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i]
-    const result = timeExp.exec(line)
-    if (!result) {
-      continue
-    }
-    const text = line.replace(timeExp, '').trim()
-    if (text) {
-      lyric.push({
-        time: (result[1] * 6e4 + result[2] * 1e3 + (result[3] || 0) * 1) / 1e3,
-        text
-      })
-    }
-  }
-  return lyric
-}
 
-// 时间格式化
+
+// 歌曲时长格式化
 export function format(value) {
   let minute = Math.floor(value / 60)
   let second = Math.floor(value % 60)
@@ -92,3 +86,5 @@ export function silencePromise(value) {
     value.then(null, () => {})
   }
 }
+
+

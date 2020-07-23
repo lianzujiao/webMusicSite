@@ -1,14 +1,16 @@
-import { defaultVolume } from '@/config'
+import {
+  defaultVolume
+} from '@/config'
 
 const _storage = window.localStorage
 const storage = {
   get(key, data = []) {
     if (_storage) {
-      return _storage.getItem(key)
-        ? Array.isArray(data)
-          ? JSON.parse(_storage.getItem(key))
-          : _storage.getItem(key)
-        : data
+      return _storage.getItem(key) ?
+        Array.isArray(data) ?
+        JSON.parse(_storage.getItem(key)) :
+        _storage.getItem(key) :
+        data
     }
   },
   set(key, val) {
@@ -29,6 +31,7 @@ const storage = {
  *          HistoryListMAX：最大长度
  */
 const HISTORYLIST_KEY = '__LPlayer_historyList__'
+const USER_KEY = "user"
 const HistoryListMAX = 200
 // 获取播放历史
 export function getHistoryList() {
@@ -39,7 +42,7 @@ export function getHistoryList() {
 export function setHistoryList(music) {
   let list = storage.get(HISTORYLIST_KEY)
   const index = list.findIndex(item => {
-    return item.id === music.id
+    return item._id === music._id
   })
   if (index === 0) {
     return list
@@ -57,8 +60,12 @@ export function setHistoryList(music) {
 
 // 删除一条播放历史
 export function removeHistoryList(music) {
-  storage.set(HISTORYLIST_KEY, JSON.stringify(music))
-  return music
+  let list = getHistoryList()
+  let index = list.findIndex(item => {
+    item._id == music._id;
+  })
+  list.splice(index, 1);
+  return list
 }
 
 // 清空播放历史
@@ -86,9 +93,16 @@ export function setMode(mode) {
 
 
 //设置登录用户
-export function set_User(user){
-  storage.set(user,user)
+export function set_User(user) {
+  storage.set(user, user)
   return user;
+}
+
+//退出登录，删除user信息
+export function clearUserMsg() {
+  storage.clear(USER_KEY)
+  return {}
+
 }
 
 /**

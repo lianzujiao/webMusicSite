@@ -23,7 +23,11 @@ export const getById=p=>{
 export const hotSheet=p=>{
     return get('/songSheet/hot',p)
 }
-//获取最新歌单
+//根据标签选择列表
 export const getByTag=p=>{
     return get('/songSheet/getByTag',p)
+}
+//添加歌单点击量
+export const popularity=p=>{
+    return post('/songSheet/popular',p)
 }

@@ -1,7 +1,7 @@
 <template>
   <div class="news-dea">
     <div class="top-img">
-      <img :src="news.bigImg" alt />
+      <img v-if="news.bigImg" :src="news.bigImg" alt />
     </div>
     <div class="news-dea-content">
       <h3>{{news.title}}</h3>

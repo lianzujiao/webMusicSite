@@ -29,20 +29,17 @@ const mutations = {
   [types.SET_COLLECTLIST](state,collectList){
     state.collectList=collectList
   },
+  //修改关注歌手列表
+  [types.SET_COLLECTSINGERS](state,collectSingers){
+    state.collectSingers=collectSingers
+  },
   // 修改播放历史列表
   [types.SET_HISTORYLIST](state, historyList) {
     state.historyList = historyList
   },
   //设置当前用户
   [types.SET_USER](state, user) {
-    if (user) {
-      state.user = user;
-    } else {
-      state.user = {
-        email: '',
-        password: ''
-      }
-    }
+    state.user = user;
 
   },
   //判断是否已经登录
